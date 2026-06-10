@@ -1,9 +1,0 @@
-{
-  "name": "River Music",
-  "short_name": "River Music",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#0f1f3d",
-  "theme_color": "#0f1f3d",
-  "orientation": "portrait"
-}
