@@ -1,7 +1,7 @@
 {
   "name": "River Music",
   "short_name": "River Music",
-  "start_url": "./RiverMusic_v3_PWA.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0f1f3d",
   "theme_color": "#0f1f3d",
