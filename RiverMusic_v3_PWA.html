@@ -1,0 +1,2398 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>River Music — Sistema de Gestión v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════════════
+   RIVER MUSIC v3 — Sistema de Gestión Académica
+   Paleta: Navy / Gold / Cream — Modo claro + oscuro
+   ══════════════════════════════════════════════════════ */
+
+/* ── TOKENS MODO CLARO ── */
+:root {
+  --navy:    #0f1f3d;
+  --navy2:   #1a2f52;
+  --navy3:   #0a1628;
+  --gold:    #c9a227;
+  --gold2:   #e8c247;
+  --gold3:   #f5d97a;
+  --cream:   #faf8f3;
+  --surface: #ffffff;
+  --surface2:#f4f2ed;
+  --surface3:#ede9e1;
+  --border:  rgba(15,31,61,0.09);
+  --border2: rgba(15,31,61,0.16);
+  --text:    #0f1f3d;
+  --text2:   #4a5568;
+  --text3:   #8a95a3;
+  --avail-bg:#eef6e8; --avail-bd:#5a9020; --avail-tx:#2d5a0a;
+  --busy-bg: #fdecea; --busy-bd: #d43f3f; --busy-tx: #8b1a1a;
+  --warn-bg: #fdf3e0; --warn-bd: #c08010; --warn-tx: #7a4f00;
+  --cancel-bg:#f0efef;--cancel-bd:#888;   --cancel-tx:#555;
+  --success: #2d7a3a; --danger: #c0392b; --warning: #c08010;
+  --r: 10px; --r2: 16px; --r3: 20px;
+  --shadow:  0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow2: 0 2px 8px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.07);
+  /* header específico */
+  --header-bg: var(--navy);
+  --header-border: rgba(255,255,255,0.06);
+  --nav-bg: var(--navy);
+  --nav-border: rgba(255,255,255,0.07);
+  --nav-active: var(--gold2);
+  --nav-idle: rgba(255,255,255,0.4);
+  --nav-hover: rgba(255,255,255,0.72);
+}
+
+/* ── TOKENS MODO OSCURO ── */
+[data-theme="dark"] {
+  --cream:   #111827;
+  --surface: #1e2737;
+  --surface2:#253044;
+  --surface3:#2d3a52;
+  --border:  rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text:    #e8edf5;
+  --text2:   #9aabbf;
+  --text3:   #5c7080;
+  --avail-bg:#162a0e; --avail-bd:#3a6010; --avail-tx:#7ab84a;
+  --busy-bg: #2a1010; --busy-bd: #a03030; --busy-tx: #f08080;
+  --warn-bg: #2a1f08; --warn-bd: #886010; --warn-tx: #d4a044;
+  --shadow:  0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
+  --shadow2: 0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.3);
+  --header-bg: #0d1926;
+  --header-border: rgba(255,255,255,0.06);
+  --nav-bg: #0d1926;
+  --nav-border: rgba(255,255,255,0.07);
+  --nav-active: var(--gold2);
+  --nav-idle: rgba(255,255,255,0.35);
+  --nav-hover: rgba(255,255,255,0.65);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+  transition: background .25s, color .25s;
+}
+
+/* ── HEADER ── */
+.app-header {
+  background: var(--header-bg);
+  color: white;
+  padding: 13px 18px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 40;
+  border-bottom: 1px solid var(--header-border);
+}
+.logo { display:flex; align-items:center; gap:10px; }
+.logo-icon {
+  width:34px; height:34px; background:var(--gold);
+  border-radius:8px; display:flex; align-items:center; justify-content:center;
+  font-size:18px; color:var(--navy); font-weight:700;
+}
+.logo-text { font-family:'DM Serif Display',serif; font-size:18px; letter-spacing:.3px; }
+.logo-sub { font-size:9.5px; opacity:.5; letter-spacing:1.5px; text-transform:uppercase; display:block; margin-top:-2px; }
+.header-right { display:flex; align-items:center; gap:8px; }
+.header-date { font-size:10.5px; opacity:.55; text-align:right; }
+.header-btn {
+  background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15);
+  color:white; border-radius:8px; padding:5px 8px; cursor:pointer;
+  font-size:11px; font-family:'DM Sans',sans-serif; transition:background .15s;
+  display:flex; align-items:center; gap:4px;
+}
+.header-btn:hover { background:rgba(255,255,255,0.18); }
+.header-btn i { font-size:15px; }
+
+/* ── NAV ── */
+.bottom-nav {
+  position:fixed; bottom:0; left:0; right:0;
+  background:var(--nav-bg); display:flex; z-index:40;
+  border-top:1px solid var(--nav-border);
+}
+.nav-item {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:2px; padding:7px 2px 10px; cursor:pointer; border:none; background:transparent;
+  color:var(--nav-idle); font-family:'DM Sans',sans-serif;
+  font-size:9.5px; font-weight:500; transition:color .2s;
+}
+.nav-item i { font-size:20px; transition:transform .15s; }
+.nav-item.active { color:var(--nav-active); }
+.nav-item.active i { transform:translateY(-1px); }
+.nav-item:hover { color:var(--nav-hover); }
+
+/* ── SECTIONS ── */
+.section { display:none; padding:16px; animation:fadeIn .18s ease; }
+.section.active { display:block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+
+/* ── PAGE TITLE ── */
+.page-title { font-family:'DM Serif Display',serif; font-size:22px; color:var(--text); margin-bottom:14px; }
+.page-title span { color:var(--gold); }
+.page-subtitle { font-size:12px; color:var(--text3); margin-top:-10px; margin-bottom:14px; }
+
+/* ── KPI GRID ── */
+.kpi-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+.kpi-grid-3 { grid-template-columns:1fr 1fr 1fr; }
+.kpi-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r2); padding:14px; box-shadow:var(--shadow);
+}
+.kpi-label { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:.8px; margin-bottom:4px; }
+.kpi-value { font-size:24px; font-weight:600; color:var(--text); line-height:1; }
+.kpi-sub { font-size:10.5px; color:var(--text3); margin-top:4px; }
+.kpi-icon { font-size:20px; float:right; opacity:.18; margin-top:-2px; }
+.kpi-card.accent { background:var(--navy); border-color:var(--navy3); }
+.kpi-card.accent .kpi-label { color:rgba(255,255,255,.45); }
+.kpi-card.accent .kpi-value { color:var(--gold2); }
+.kpi-card.accent .kpi-sub { color:rgba(255,255,255,.35); }
+.kpi-card.gold { background:var(--gold); border-color:var(--gold); }
+.kpi-card.gold .kpi-label { color:rgba(15,31,61,.55); }
+.kpi-card.gold .kpi-value { color:var(--navy3); }
+.kpi-card.gold .kpi-sub { color:rgba(15,31,61,.5); }
+
+/* ── PROGRESS ── */
+.prog-wrap { height:5px; background:var(--surface2); border-radius:99px; margin-top:8px; overflow:hidden; }
+.prog-fill { height:100%; border-radius:99px; background:var(--gold); transition:width .7s cubic-bezier(.22,1,.36,1); }
+.prog-fill.green  { background:#5a9020; }
+.prog-fill.red    { background:var(--danger); }
+.prog-fill.amber  { background:var(--gold); }
+
+/* ── ALERTS ── */
+.alerts { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+.alert {
+  padding:10px 12px; border-radius:var(--r); font-size:12px;
+  display:flex; gap:10px; align-items:flex-start; border:1px solid;
+}
+.alert i { font-size:16px; flex-shrink:0; margin-top:1px; }
+.alert.danger  { background:var(--busy-bg); border-color:var(--busy-bd); color:var(--busy-tx); }
+.alert.warning { background:var(--warn-bg); border-color:var(--warn-bd); color:var(--warn-tx); }
+.alert.info    { background:#e8f0fd; border-color:#b8ccf5; color:#1a3a80; }
+.alert.success { background:#e3f3e5; border-color:#9dd4a8; color:#1a5e28; }
+[data-theme="dark"] .alert.info    { background:#0f1d3a; border-color:#2244aa; color:#88aaee; }
+[data-theme="dark"] .alert.success { background:#0a2012; border-color:#2d6a2a; color:#6dbb78; }
+.alert strong  { font-weight:600; display:block; margin-bottom:2px; }
+
+/* ── CHART BOXES ── */
+.chart-box {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r2); padding:14px; margin-bottom:12px; box-shadow:var(--shadow);
+}
+.chart-box-title {
+  font-size:10.5px; font-weight:600; color:var(--text2);
+  text-transform:uppercase; letter-spacing:.8px; margin-bottom:12px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.bar-chart { display:flex; flex-direction:column; gap:7px; }
+.bar-row { display:flex; align-items:center; gap:8px; }
+.bar-lbl { width:64px; font-size:11px; color:var(--text2); text-align:right; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bar-track { flex:1; height:20px; background:var(--surface2); border-radius:6px; overflow:hidden; }
+.bar-fill {
+  height:100%; border-radius:6px; display:flex; align-items:center; padding:0 7px;
+  font-size:10px; font-weight:600; color:white;
+  transition:width .7s cubic-bezier(.22,1,.36,1); white-space:nowrap; min-width:20px;
+}
+.bf-navy  { background:var(--navy); }
+.bf-gold  { background:var(--gold); color:var(--navy); }
+.bf-green { background:#5a9020; }
+.bf-coral { background:#c05030; }
+.bf-blue  { background:#2255a8; }
+
+/* ── SECTION CARD ── */
+.section-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r2); overflow:hidden; margin-bottom:14px; box-shadow:var(--shadow);
+}
+.section-card-header {
+  padding:11px 14px; border-bottom:1px solid var(--border);
+  font-size:11px; font-weight:600; color:var(--text2);
+  text-transform:uppercase; letter-spacing:.6px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.scard-action {
+  font-size:11px; color:var(--gold); font-weight:600; cursor:pointer;
+  background:none; border:none; font-family:'DM Sans',sans-serif; padding:0;
+}
+
+/* ── CALENDAR / AGENDA ── */
+.cal-controls {
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:8px;
+}
+.cal-title { font-family:'DM Serif Display',serif; font-size:16px; color:var(--text); flex:1; text-align:center; }
+.cal-btn {
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:8px; padding:6px 10px; cursor:pointer; font-size:13px;
+  color:var(--text2); transition:background .15s; display:flex; align-items:center; gap:4px;
+}
+.cal-btn:hover { background:var(--surface2); }
+.cal-btn.active-view { background:var(--navy); color:white; border-color:var(--navy); }
+.cal-view-toggle { display:flex; gap:4px; }
+.cal-legend { display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+.leg { display:flex; align-items:center; gap:5px; font-size:10px; color:var(--text2); }
+.leg-dot { width:10px; height:10px; border-radius:3px; border:1px solid; }
+.cal-scroll { overflow-x:auto; }
+.cal-grid {
+  display:grid; grid-template-columns:52px repeat(7,minmax(54px,1fr));
+  gap:2px; min-width:440px;
+}
+.cal-head-cell {
+  text-align:center; font-size:10px; font-weight:600; color:var(--text3);
+  padding:4px 0 6px; text-transform:uppercase; letter-spacing:.5px;
+}
+.cal-head-cell.today { color:var(--gold); }
+.cal-time { font-size:10px; color:var(--text3); text-align:right; padding-right:6px; height:38px; line-height:38px; }
+.cal-slot {
+  height:38px; border-radius:6px; border:1px solid var(--border);
+  background:var(--surface2); cursor:pointer; display:flex; align-items:center;
+  justify-content:center; font-size:9px; font-weight:600;
+  transition:all .12s; overflow:hidden; padding:2px; text-align:center; line-height:1.2; position:relative;
+}
+.cal-slot:hover { filter:brightness(.93); transform:scale(1.02); }
+.cal-slot.available { background:var(--avail-bg); border-color:var(--avail-bd); color:var(--avail-tx); }
+.cal-slot.busy1 { background:#fff3e0; border-color:#e8a020; color:#7a4f00; }
+.cal-slot.busy2 { background:#ffe8e0; border-color:#d05020; color:#7a2000; }
+.cal-slot.busy3 { background:var(--busy-bg); border-color:var(--busy-bd); color:var(--busy-tx); }
+.cal-slot.conflict { background:#f5e8ff; border-color:#9933cc; color:#5500aa; border-width:2px; }
+[data-theme="dark"] .cal-slot.busy1 { background:#2a1e08; border-color:#a07020; color:#d4a044; }
+[data-theme="dark"] .cal-slot.busy2 { background:#2a1408; border-color:#a04020; color:#d47044; }
+.slot-count { font-size:13px; font-weight:700; display:block; }
+.slot-bar { position:absolute; bottom:2px; left:3px; right:3px; height:3px; background:rgba(0,0,0,0.15); border-radius:99px; overflow:hidden; }
+.slot-bar-fill { height:100%; background:currentColor; border-radius:99px; }
+
+/* ── AGENDA WEEK NAV ── */
+.agenda-week-nav {
+  display:flex; align-items:center; gap:8px; margin-bottom:12px;
+}
+.week-label {
+  font-size:12px; font-weight:600; color:var(--text2); flex:1; text-align:center;
+}
+/* ── AGENDA LIST VIEW ── */
+.agenda-list { display:flex; flex-direction:column; gap:10px; }
+.agenda-day-group {}
+.agenda-day-header {
+  font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase;
+  letter-spacing:1px; padding:6px 0 4px; display:flex; align-items:center; gap:8px;
+}
+.agenda-day-header::after { content:''; flex:1; height:1px; background:var(--border); }
+.agenda-slot-item {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:10px 12px; display:flex; align-items:center; gap:10px;
+  cursor:pointer; transition:border-color .12s;
+}
+.agenda-slot-item:hover { border-color:var(--gold); }
+.agenda-slot-time { font-size:12px; font-weight:700; color:var(--navy2); width:42px; flex-shrink:0; }
+[data-theme="dark"] .agenda-slot-time { color:var(--gold3); }
+.agenda-slot-names { flex:1; font-size:12px; font-weight:500; }
+.agenda-slot-count { font-size:10px; color:var(--text3); }
+.agenda-empty { text-align:center; padding:24px; color:var(--text3); font-size:12px; }
+/* Conflict badge */
+.conflict-badge {
+  font-size:9px; background:#f5e8ff; color:#5500aa; border:1px solid #9933cc;
+  border-radius:99px; padding:2px 7px; font-weight:700;
+}
+[data-theme="dark"] .conflict-badge { background:#2a0044; color:#cc88ff; border-color:#7722aa; }
+
+/* ── SEARCH & FILTERS ── */
+.search-wrap { position:relative; margin-bottom:12px; }
+.search-wrap i { position:absolute; left:11px; top:50%; transform:translateY(-50%); font-size:16px; color:var(--text3); pointer-events:none; }
+.search-input {
+  width:100%; padding:9px 12px 9px 36px; border:1px solid var(--border2);
+  border-radius:var(--r); font-family:'DM Sans',sans-serif; font-size:13px;
+  background:var(--surface); color:var(--text); outline:none; transition:border-color .15s;
+}
+.search-input:focus { border-color:var(--gold); }
+.filter-row { display:flex; gap:6px; margin-bottom:12px; overflow-x:auto; padding-bottom:2px; }
+.filter-chip {
+  flex-shrink:0; padding:5px 12px; border:1px solid var(--border2);
+  border-radius:99px; font-size:11px; font-weight:500; cursor:pointer;
+  background:var(--surface); color:var(--text2); transition:all .12s; white-space:nowrap;
+}
+.filter-chip.active { background:var(--navy); border-color:var(--navy); color:white; }
+.filter-chip:hover:not(.active) { border-color:var(--gold); color:var(--text); }
+
+/* ── STUDENT CARDS ── */
+.student-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r2); padding:13px; margin-bottom:10px;
+  box-shadow:var(--shadow); cursor:pointer; transition:border-color .15s, box-shadow .15s;
+}
+.student-card:hover { border-color:var(--gold); box-shadow:0 2px 12px rgba(201,162,39,.15); }
+.sc-top { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.avatar {
+  width:38px; height:38px; border-radius:50%; display:flex; align-items:center;
+  justify-content:center; font-size:13px; font-weight:600; flex-shrink:0;
+}
+.sc-name { font-size:14px; font-weight:600; }
+.sc-sub  { font-size:11px; color:var(--text3); }
+.sc-meta { display:grid; grid-template-columns:1fr 1fr; gap:5px 12px; font-size:11px; }
+.meta-lbl { color:var(--text3); }
+.meta-val { color:var(--text); font-weight:500; }
+.sc-inactive { opacity:.55; }
+/* Schedule tags on student card */
+.schedule-tags { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
+.schedule-tag {
+  font-size:9.5px; background:var(--surface2); border:1px solid var(--border2);
+  border-radius:5px; padding:2px 7px; color:var(--text2);
+}
+
+/* ── BADGES ── */
+.badge {
+  display:inline-flex; align-items:center; padding:3px 9px; border-radius:99px;
+  font-size:10px; font-weight:600; letter-spacing:.2px; white-space:nowrap;
+}
+.badge-green  { background:#e3f3e5; color:#1a5e28; }
+.badge-red    { background:#fde8e8; color:#8b1a1a; }
+.badge-amber  { background:var(--warn-bg); color:var(--warn-tx); }
+.badge-blue   { background:#e8f0fd; color:#1a3a80; }
+.badge-gray   { background:var(--surface2); color:var(--text2); }
+.badge-navy   { background:var(--navy); color:white; }
+.badge-purple { background:#f5e8ff; color:#5500aa; }
+[data-theme="dark"] .badge-green  { background:#0a2012; color:#6dbb78; }
+[data-theme="dark"] .badge-red    { background:#2a0a0a; color:#f08080; }
+[data-theme="dark"] .badge-blue   { background:#0a1530; color:#88aaee; }
+
+/* ── ATTENDANCE ── */
+.attend-date-nav {
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r2); padding:10px 14px;
+}
+.attend-date-label { font-family:'DM Serif Display',serif; font-size:15px; color:var(--text); }
+.attend-nav-btn {
+  background:var(--surface2); border:1px solid var(--border2); border-radius:7px;
+  padding:5px 10px; cursor:pointer; font-size:12px; color:var(--text2); transition:background .15s;
+}
+.attend-nav-btn:hover { background:var(--surface3); }
+.attend-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r2); padding:13px; margin-bottom:10px; box-shadow:var(--shadow);
+}
+.ac-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+.ac-btns { display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end; }
+.ac-btn {
+  padding:5px 8px; font-size:10px; font-weight:600; border:1px solid var(--border2);
+  border-radius:7px; cursor:pointer; background:var(--surface2); color:var(--text2);
+  font-family:'DM Sans',sans-serif; transition:all .12s;
+}
+.ac-btn:hover { border-color:var(--navy); color:var(--text); }
+.ac-btn.s-ok  { background:#e3f3e5; border-color:#5a9020; color:#1a5e28; }
+.ac-btn.s-no  { background:#fde8e8; border-color:#c0392b; color:#7a1515; }
+.ac-btn.s-late{ background:var(--warn-bg); border-color:var(--warn-bd); color:var(--warn-tx); }
+.ac-btn.s-jus { background:#e8f0fd; border-color:#5577cc; color:#1a3a80; }
+[data-theme="dark"] .ac-btn.s-ok   { background:#0a2012; border-color:#3a7020; color:#7dbb88; }
+[data-theme="dark"] .ac-btn.s-no   { background:#2a0a0a; border-color:#903020; color:#f08080; }
+[data-theme="dark"] .ac-btn.s-late { background:#2a1f08; border-color:#886010; color:#d4a044; }
+[data-theme="dark"] .ac-btn.s-jus  { background:#0a1530; border-color:#3355aa; color:#88aaee; }
+.ac-stamp { font-size:10px; color:var(--text3); margin-top:4px; }
+.attend-summary {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:14px;
+}
+.att-sum-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
+  padding:10px 8px; text-align:center;
+}
+.att-sum-n { font-size:20px; font-weight:700; color:var(--text); }
+.att-sum-l { font-size:9.5px; color:var(--text3); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+
+/* ── HISTORY CALENDAR (REDISEÑADO) ── */
+.hist-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-bottom:4px; }
+.hist-day-head { font-size:9px; color:var(--text3); text-align:center; font-weight:600; text-transform:uppercase; letter-spacing:.5px; padding-bottom:3px; }
+.hist-day {
+  aspect-ratio:1; border-radius:6px; display:flex; align-items:center; justify-content:center;
+  font-size:11px; cursor:pointer; font-weight:500; transition:all .12s; border:1.5px solid transparent;
+  position:relative;
+}
+.hist-day.empty { opacity:0; pointer-events:none; }
+.hist-day.today { border-color:var(--gold) !important; font-weight:700; color:var(--gold); }
+.hist-day.no-class { background:var(--surface2); color:var(--text3); }
+/* Colores por tipo dominante */
+.hist-day.att-ok   { background:var(--avail-bg); border-color:var(--avail-bd); color:var(--avail-tx); }
+.hist-day.att-mix  { background:#fff3e0; border-color:#e8a020; color:#7a4f00; }
+.hist-day.att-no   { background:var(--busy-bg); border-color:var(--busy-bd); color:var(--busy-tx); }
+.hist-day.att-late { background:var(--warn-bg); border-color:var(--warn-bd); color:var(--warn-tx); }
+.hist-day.selected { background:var(--navy) !important; color:white !important; border-color:var(--navy) !important; }
+.hist-day:hover:not(.empty) { transform:scale(1.08); }
+/* Dot indicator */
+.hist-day .day-dot {
+  position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
+  width:4px; height:4px; border-radius:50%;
+}
+
+/* ── ATT STATS / RISK INDICATORS ── */
+.risk-bar { height:6px; background:var(--surface2); border-radius:99px; overflow:hidden; margin-top:4px; }
+.risk-fill { height:100%; border-radius:99px; }
+.risk-high   { background:#c0392b; }
+.risk-medium { background:#c08010; }
+.risk-low    { background:#5a9020; }
+.att-legend { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+.att-leg-item { display:flex; align-items:center; gap:5px; font-size:10px; color:var(--text2); }
+.att-leg-dot { width:8px; height:8px; border-radius:50%; }
+
+/* ── PAYMENTS ── */
+.pay-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:11px 14px; border-bottom:1px solid var(--border); font-size:13px;
+}
+.pay-row:last-child { border-bottom:none; }
+.pay-name { font-weight:500; }
+.pay-detail { font-size:10px; color:var(--text3); margin-top:1px; }
+.pay-amount { font-weight:600; font-size:14px; }
+.pay-actions { display:flex; gap:6px; align-items:center; }
+.pay-btn {
+  padding:4px 10px; font-size:10px; font-weight:600; border-radius:7px; cursor:pointer;
+  font-family:'DM Sans',sans-serif; transition:all .12s; border:1px solid;
+}
+.pay-btn-ok   { background:#e3f3e5; border-color:#5a9020; color:#1a5e28; }
+.pay-btn-ok:hover { background:#5a9020; color:white; }
+.pay-btn-add  { background:var(--surface2); border-color:var(--border2); color:var(--text2); }
+.pay-btn-add:hover { border-color:var(--gold); color:var(--gold); }
+.pay-btn-hist { background:var(--surface2); border-color:var(--border2); color:var(--text2); }
+.pay-btn-hist:hover { border-color:var(--navy); color:var(--text); }
+.pay-summary {
+  background:var(--navy); border-radius:var(--r2); padding:14px; color:white;
+}
+.pay-sum-row { display:flex; justify-content:space-between; font-size:13px; margin-bottom:7px; }
+.pay-sum-row:last-child { border-top:1px solid rgba(255,255,255,.12); padding-top:8px; margin-bottom:0; font-weight:600; }
+.pay-sum-row span:last-child { font-weight:600; }
+/* Pay history editable entry */
+.pay-hist-entry {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 0; border-bottom:1px solid var(--border); font-size:12px; gap:8px;
+}
+.pay-hist-entry:last-child { border-bottom:none; }
+.pay-hist-edit-btn {
+  padding:3px 8px; font-size:10px; font-weight:600; border:1px solid var(--border2);
+  border-radius:6px; cursor:pointer; background:var(--surface2); color:var(--text3);
+  font-family:'DM Sans',sans-serif; transition:all .12s;
+}
+.pay-hist-edit-btn:hover { border-color:var(--gold); color:var(--gold); }
+.pay-hist-del-btn {
+  padding:3px 8px; font-size:10px; font-weight:600; border:1px solid #f5b4b4;
+  border-radius:6px; cursor:pointer; background:#fde8e8; color:#8b1a1a;
+  font-family:'DM Sans',sans-serif; transition:all .12s;
+}
+.pay-hist-del-btn:hover { background:#c0392b; color:white; border-color:#c0392b; }
+
+/* ── VENCIMIENTO BADGE ── */
+.venc-badge {
+  font-size:9px; padding:2px 7px; border-radius:99px; font-weight:700;
+  background:var(--surface2); color:var(--text3); border:1px solid var(--border2);
+}
+.venc-badge.soon { background:var(--warn-bg); color:var(--warn-tx); border-color:var(--warn-bd); }
+.venc-badge.urgent { background:#fde8e8; color:#8b1a1a; border-color:#f5b4b4; }
+
+/* ── FAB ── */
+.fab {
+  position:fixed; bottom:72px; right:18px; width:52px; height:52px;
+  background:var(--gold); color:var(--navy3); border:none; border-radius:50%;
+  font-size:26px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 20px rgba(201,162,39,.45); z-index:35;
+  transition:transform .15s, box-shadow .15s;
+}
+.fab:hover { transform:scale(1.07); box-shadow:0 6px 24px rgba(201,162,39,.55); }
+.fab:active { transform:scale(.96); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display:none; position:fixed; inset:0; background:rgba(10,20,40,.55);
+  z-index:60; align-items:flex-end; justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+.modal {
+  background:var(--cream); border-radius:20px 20px 0 0; padding:20px 18px 32px;
+  width:100%; max-width:520px; max-height:92vh; overflow-y:auto;
+  animation:slideUp .22s cubic-bezier(.22,1,.36,1);
+}
+@keyframes slideUp { from { transform:translateY(40px); opacity:0; } to { transform:none; opacity:1; } }
+.modal-handle { width:36px; height:4px; background:var(--border2); border-radius:99px; margin:0 auto 16px; }
+.modal-title { font-family:'DM Serif Display',serif; font-size:20px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; color:var(--text); }
+.modal-close { background:none; border:none; font-size:22px; cursor:pointer; color:var(--text3); line-height:1; }
+
+/* ── FORMS ── */
+.form-row { margin-bottom:12px; }
+.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+.form-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px; }
+.form-label { font-size:10.5px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:5px; }
+.form-hint { font-size:10px; color:var(--text3); margin-top:3px; }
+.form-input, .form-select {
+  width:100%; padding:9px 11px; border:1px solid var(--border2);
+  border-radius:var(--r); font-family:'DM Sans',sans-serif; font-size:13px;
+  background:var(--surface); color:var(--text); outline:none; transition:border-color .15s;
+  -webkit-appearance:none;
+}
+.form-input:focus, .form-select:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,162,39,.12); }
+.form-textarea { resize:vertical; min-height:60px; }
+.btn-primary {
+  width:100%; padding:13px; background:var(--navy); color:white; border:none;
+  border-radius:var(--r); font-family:'DM Serif Display',serif; font-size:15px;
+  cursor:pointer; transition:background .15s; margin-top:4px; letter-spacing:.3px;
+}
+.btn-primary:hover { background:var(--navy2); }
+.btn-secondary {
+  width:100%; padding:11px; background:var(--surface2); color:var(--text);
+  border:1px solid var(--border2); border-radius:var(--r); font-family:'DM Sans',sans-serif;
+  font-size:13px; font-weight:600; cursor:pointer; transition:background .15s;
+}
+.btn-secondary:hover { background:var(--surface3); }
+.form-section { border-top:1px solid var(--border); padding-top:12px; margin-top:12px; margin-bottom:0; }
+.form-section-title { font-size:10px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+
+/* ── SCHEDULE BUILDER (multi-slot) ── */
+.schedule-builder { margin-bottom:12px; }
+.schedule-slot-row {
+  display:flex; align-items:center; gap:6px; margin-bottom:6px;
+  background:var(--surface2); border:1px solid var(--border); border-radius:var(--r); padding:7px 10px;
+}
+.schedule-slot-row select,
+.schedule-slot-row input {
+  flex:1; padding:5px 8px; border:1px solid var(--border2); border-radius:7px;
+  font-family:'DM Sans',sans-serif; font-size:12px; background:var(--surface); color:var(--text);
+  min-width:0;
+}
+.schedule-slot-row select:focus,
+.schedule-slot-row input:focus { border-color:var(--gold); outline:none; }
+.del-slot-btn {
+  background:none; border:none; font-size:18px; cursor:pointer; color:var(--text3);
+  padding:0 2px; transition:color .12s; flex-shrink:0;
+}
+.del-slot-btn:hover { color:var(--danger); }
+.add-slot-btn {
+  width:100%; padding:7px; border:1px dashed var(--border2); border-radius:var(--r);
+  background:transparent; color:var(--text3); font-size:12px; font-weight:600;
+  cursor:pointer; transition:all .12s; font-family:'DM Sans',sans-serif;
+}
+.add-slot-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+/* ── DETAIL MODAL ── */
+.detail-field { padding:9px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size:13px; }
+.detail-field:last-child { border-bottom:none; }
+.detail-lbl { color:var(--text3); flex-shrink:0; }
+.detail-val { font-weight:500; text-align:right; max-width:62%; }
+.detail-actions { display:flex; gap:8px; margin-top:14px; }
+.btn-danger { flex:1; padding:11px; background:#fde8e8; color:#8b1a1a; border:1px solid #f5b4b4; border-radius:var(--r); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; }
+.btn-edit   { flex:1; padding:11px; background:var(--surface2); color:var(--text); border:1px solid var(--border2); border-radius:var(--r); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; }
+.btn-pay    { flex:1; padding:11px; background:#e3f3e5; color:#1a5e28; border:1px solid #9dd4a8; border-radius:var(--r); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; }
+
+/* ── TABS ── */
+.tab-row { display:flex; gap:0; margin-bottom:14px; background:var(--surface2); border-radius:var(--r); padding:3px; border:1px solid var(--border); }
+.tab-btn {
+  flex:1; padding:7px 6px; border:none; border-radius:7px; cursor:pointer;
+  font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; color:var(--text3);
+  background:transparent; transition:all .15s; white-space:nowrap;
+}
+.tab-btn.active { background:var(--surface); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,0.1); }
+.tab-pane { display:none; }
+.tab-pane.active { display:block; }
+
+/* ── STATS ── */
+.stat-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.stat-row:last-child { border-bottom:none; }
+.stat-label { color:var(--text2); }
+.stat-val { font-weight:600; color:var(--text); }
+.rank-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
+.rank-item:last-child { border-bottom:none; }
+.rank-n { width:20px; font-size:11px; font-weight:700; color:var(--text3); text-align:center; }
+.rank-n.top { color:var(--gold); }
+
+/* ── BACKUP / SETTINGS ── */
+.settings-row { display:flex; justify-content:space-between; align-items:center; padding:13px 0; border-bottom:1px solid var(--border); font-size:13px; }
+.settings-row:last-child { border-bottom:none; }
+.settings-label { font-weight:500; }
+.settings-sub { font-size:11px; color:var(--text3); margin-top:2px; }
+.settings-btn {
+  padding:7px 14px; border-radius:var(--r); border:1px solid var(--border2);
+  font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer;
+  background:var(--surface2); color:var(--text); transition:all .12s; white-space:nowrap;
+}
+.settings-btn:hover { background:var(--surface3); border-color:var(--navy); }
+.settings-btn.danger { background:#fde8e8; color:#8b1a1a; border-color:#f5b4b4; }
+.settings-btn.success { background:#e3f3e5; color:#1a5e28; border-color:#9dd4a8; }
+.toggle-switch {
+  position:relative; display:inline-block; width:42px; height:24px;
+}
+.toggle-switch input { opacity:0; width:0; height:0; }
+.toggle-slider {
+  position:absolute; cursor:pointer; inset:0; background:var(--surface3);
+  border-radius:99px; transition:.3s; border:1px solid var(--border2);
+}
+.toggle-slider:before {
+  content:''; position:absolute; height:18px; width:18px; left:2px; bottom:2px;
+  background:white; border-radius:50%; transition:.3s; box-shadow:0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-switch input:checked + .toggle-slider { background:var(--gold); border-color:var(--gold); }
+.toggle-switch input:checked + .toggle-slider:before { transform:translateX(18px); }
+
+/* ── EMPTY ── */
+.empty { text-align:center; padding:32px 16px; color:var(--text3); font-size:13px; }
+.empty i { font-size:36px; display:block; margin-bottom:10px; opacity:.35; }
+
+/* ── DIVIDER ── */
+.divider { height:1px; background:var(--border); margin:12px 0; }
+
+/* ── TOOLTIP POPUP ── */
+.slot-popup {
+  position:absolute; z-index:100; background:var(--navy); color:white;
+  border-radius:10px; padding:10px 12px; font-size:11px; min-width:160px;
+  box-shadow:var(--shadow2); pointer-events:none; bottom:calc(100% + 6px); left:50%;
+  transform:translateX(-50%); white-space:normal; line-height:1.4;
+  animation:fadeIn .12s ease;
+}
+.slot-popup::after {
+  content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+  border:6px solid transparent; border-top-color:var(--navy);
+}
+
+/* ── CONFIRM DIALOG ── */
+.confirm-overlay {
+  display:none; position:fixed; inset:0; background:rgba(10,20,40,.6);
+  z-index:80; align-items:center; justify-content:center; padding:20px;
+}
+.confirm-overlay.open { display:flex; }
+.confirm-box {
+  background:var(--cream); border-radius:var(--r2); padding:24px 20px; width:100%; max-width:340px;
+  box-shadow:var(--shadow2); animation:fadeIn .18s ease;
+}
+.confirm-title { font-family:'DM Serif Display',serif; font-size:18px; color:var(--text); margin-bottom:8px; }
+.confirm-msg { font-size:13px; color:var(--text2); margin-bottom:20px; line-height:1.5; }
+.confirm-btns { display:flex; gap:8px; }
+.confirm-cancel { flex:1; padding:11px; background:var(--surface2); color:var(--text); border:1px solid var(--border2); border-radius:var(--r); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; }
+.confirm-ok { flex:1; padding:11px; background:var(--navy); color:white; border:none; border-radius:var(--r); font-family:'DM Serif Display',serif; font-size:14px; cursor:pointer; }
+.confirm-ok.danger { background:#c0392b; }
+
+/* ── RESPONSIVE ── */
+@media (max-width:380px) {
+  .kpi-grid-3 { grid-template-columns:1fr 1fr; }
+  .form-row-2 { grid-template-columns:1fr; }
+  .form-row-3 { grid-template-columns:1fr 1fr; }
+  .attend-summary { grid-template-columns:1fr 1fr; }
+  .detail-actions { flex-wrap:wrap; }
+}
+
+/* ── EDIT PAY INLINE ── */
+.pay-edit-row {
+  display:flex; gap:6px; align-items:center; flex-wrap:wrap;
+  padding:8px 14px; border-bottom:1px solid var(--border);
+  background:var(--surface2);
+}
+.pay-edit-row input, .pay-edit-row select {
+  flex:1; padding:5px 8px; border:1px solid var(--border2); border-radius:7px;
+  font-family:'DM Sans',sans-serif; font-size:12px; background:var(--surface); color:var(--text); min-width:0;
+}
+.pay-edit-row input[type="number"] { max-width:80px; }
+.pay-edit-row input[type="date"] { max-width:130px; }
+.save-edit-btn {
+  padding:5px 12px; font-size:11px; font-weight:700; background:var(--navy); color:white;
+  border:none; border-radius:7px; cursor:pointer;
+}
+.save-edit-btn:hover { background:var(--navy2); }
+</style>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f1f3d">
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="app-header">
+  <div class="logo">
+    <div class="logo-icon">♪</div>
+    <div>
+      <div class="logo-text">River Music</div>
+      <span class="logo-sub">Academia de Música</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-date" id="header-date"></div>
+    <button class="header-btn" id="dark-mode-btn" onclick="toggleDarkMode()" title="Modo oscuro">
+      <i class="ti ti-moon" id="dark-icon"></i>
+    </button>
+    <button class="header-btn" onclick="showSec('config',null)" title="Configuración">
+      <i class="ti ti-settings"></i>
+    </button>
+  </div>
+</header>
+
+<!-- ═══ SECTIONS ═══ -->
+
+<!-- DASHBOARD -->
+<div class="section active" id="sec-dashboard">
+  <div class="page-title">Panel <span>general</span></div>
+  <div id="dash-alerts" class="alerts"></div>
+  <div class="kpi-grid" id="kpi-grid"></div>
+  <div class="chart-box">
+    <div class="chart-box-title">Alumnos por instrumento</div>
+    <div class="bar-chart" id="chart-inst"></div>
+  </div>
+  <div class="chart-box">
+    <div class="chart-box-title">
+      <span>Horarios más solicitados</span>
+      <span style="font-size:10px;color:var(--text3);font-weight:400">top 6</span>
+    </div>
+    <div class="bar-chart" id="chart-hours"></div>
+  </div>
+  <div class="chart-box">
+    <div class="chart-box-title">Días con más alumnos</div>
+    <div class="bar-chart" id="chart-days"></div>
+  </div>
+  <div class="section-card" id="dash-upcoming">
+    <div class="section-card-header">
+      <span>Próximos vencimientos</span>
+      <button class="scard-action" onclick="showSec('pagos',document.getElementById('nav-pagos'))">Ver todos →</button>
+    </div>
+    <div id="upcoming-list"></div>
+  </div>
+</div>
+
+<!-- AGENDA -->
+<div class="section" id="sec-agenda">
+  <div class="page-title">Agenda <span>semanal</span></div>
+
+  <!-- Controles de navegación semana + vista -->
+  <div class="agenda-week-nav">
+    <button class="cal-btn" onclick="changeWeek(-1)"><i class="ti ti-chevron-left"></i></button>
+    <div class="week-label" id="week-label">Semana actual</div>
+    <button class="cal-btn" onclick="changeWeek(0)" title="Hoy" style="font-size:10px;font-weight:600">Hoy</button>
+    <button class="cal-btn" onclick="changeWeek(1)"><i class="ti ti-chevron-right"></i></button>
+  </div>
+
+  <!-- Toggle vista -->
+  <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center">
+    <button class="cal-btn active-view" id="btn-view-grid" onclick="setAgendaView('grid',this)"><i class="ti ti-layout-grid" style="font-size:14px"></i> Rejilla</button>
+    <button class="cal-btn" id="btn-view-list" onclick="setAgendaView('list',this)"><i class="ti ti-list" style="font-size:14px"></i> Lista</button>
+    <div id="conflict-alert" style="display:none;margin-left:auto">
+      <span class="conflict-badge"><i class="ti ti-alert-triangle" style="font-size:10px"></i> Conflictos detectados</span>
+    </div>
+  </div>
+
+  <div class="cal-legend">
+    <div class="leg"><div class="leg-dot" style="background:var(--avail-bg);border-color:var(--avail-bd)"></div>Libre</div>
+    <div class="leg"><div class="leg-dot" style="background:#fff3e0;border-color:#e8a020"></div>1–2 alumnos</div>
+    <div class="leg"><div class="leg-dot" style="background:#ffe8e0;border-color:#d05020"></div>3–4 alumnos</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--busy-bg);border-color:var(--busy-bd)"></div>5+ alumnos</div>
+    <div class="leg"><div class="leg-dot" style="background:#f5e8ff;border-color:#9933cc;border-width:2px"></div>Conflicto</div>
+  </div>
+
+  <!-- Vista rejilla -->
+  <div id="agenda-grid-view">
+    <div class="cal-scroll">
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--text3);text-align:center;">
+      Toca una celda para ver alumnos · Celda libre para agregar alumno
+    </div>
+  </div>
+
+  <!-- Vista lista -->
+  <div id="agenda-list-view" style="display:none">
+    <div class="agenda-list" id="agenda-list-content"></div>
+  </div>
+</div>
+
+<!-- ALUMNOS -->
+<div class="section" id="sec-alumnos">
+  <div class="page-title">Alumnos <span>registrados</span></div>
+  <div class="search-wrap">
+    <i class="ti ti-search"></i>
+    <input class="search-input" type="text" id="student-search" placeholder="Buscar por nombre, instrumento, horario…" oninput="filterStudents(this.value)">
+  </div>
+  <div class="filter-row" id="filter-row">
+    <button class="filter-chip active" data-filter="todos" onclick="setFilter(this,'todos')">Todos</button>
+    <button class="filter-chip" data-filter="activo" onclick="setFilter(this,'activo')">Activos</button>
+    <button class="filter-chip" data-filter="inactivo" onclick="setFilter(this,'inactivo')">Inactivos</button>
+    <button class="filter-chip" data-filter="vencido" onclick="setFilter(this,'vencido')">Vencidos</button>
+    <button class="filter-chip" data-filter="Piano" onclick="setFilter(this,'Piano')">Piano</button>
+    <button class="filter-chip" data-filter="Guitarra" onclick="setFilter(this,'Guitarra')">Guitarra</button>
+    <button class="filter-chip" data-filter="Voz" onclick="setFilter(this,'Voz')">Voz</button>
+  </div>
+  <div id="student-list"></div>
+</div>
+
+<!-- ASISTENCIA -->
+<div class="section" id="sec-asistencia">
+  <div class="page-title">Asistencia</div>
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="switchAttTab('hoy',this)">Hoy</button>
+    <button class="tab-btn" onclick="switchAttTab('historial',this)">Historial</button>
+    <button class="tab-btn" onclick="switchAttTab('estadisticas',this)">Estadísticas</button>
+  </div>
+
+  <!-- TAB: HOY -->
+  <div class="tab-pane active" id="att-tab-hoy">
+    <div class="attend-date-nav">
+      <button class="attend-nav-btn" onclick="changeAttDate(-1)"><i class="ti ti-chevron-left"></i></button>
+      <div style="text-align:center">
+        <div class="attend-date-label" id="att-date-label"></div>
+        <div style="font-size:10px;color:var(--text3)" id="att-date-sub"></div>
+      </div>
+      <button class="attend-nav-btn" onclick="changeAttDate(1)"><i class="ti ti-chevron-right"></i></button>
+    </div>
+    <div class="attend-summary" id="att-summary"></div>
+    <div id="attend-list"></div>
+  </div>
+
+  <!-- TAB: HISTORIAL -->
+  <div class="tab-pane" id="att-tab-historial">
+    <div class="section-card">
+      <div class="section-card-header" id="hist-month-nav">
+        <button class="attend-nav-btn" onclick="changeHistMonth(-1)" style="padding:3px 8px"><i class="ti ti-chevron-left"></i></button>
+        <span id="hist-month-label" style="font-family:'DM Serif Display',serif;font-size:15px;color:var(--text)"></span>
+        <button class="attend-nav-btn" onclick="changeHistMonth(1)" style="padding:3px 8px"><i class="ti ti-chevron-right"></i></button>
+      </div>
+      <div style="padding:12px">
+        <!-- Leyenda historial -->
+        <div class="att-legend">
+          <div class="att-leg-item"><div class="att-leg-dot" style="background:var(--avail-bd)"></div>Todos asistieron</div>
+          <div class="att-leg-item"><div class="att-leg-dot" style="background:#e8a020"></div>Mixto</div>
+          <div class="att-leg-item"><div class="att-leg-dot" style="background:var(--busy-bd)"></div>Mayoría faltó</div>
+          <div class="att-leg-item"><div class="att-leg-dot" style="background:var(--warn-bd)"></div>Retardos</div>
+        </div>
+        <div class="hist-grid" id="hist-day-heads"></div>
+        <div class="hist-grid" id="hist-cal"></div>
+      </div>
+    </div>
+    <div id="hist-day-detail"></div>
+  </div>
+
+  <!-- TAB: ESTADÍSTICAS -->
+  <div class="tab-pane" id="att-tab-estadisticas">
+    <!-- KPIs asistencia -->
+    <div class="kpi-grid" id="att-kpi-grid" style="margin-bottom:12px"></div>
+    <div class="chart-box">
+      <div class="chart-box-title">Asistencia por alumno (mes actual)</div>
+      <div id="att-chart-students"></div>
+    </div>
+    <div class="section-card" style="margin-bottom:12px">
+      <div class="section-card-header">Ranking de asistencia</div>
+      <div style="padding:0 14px" id="att-ranking"></div>
+    </div>
+    <div class="section-card" style="margin-bottom:12px">
+      <div class="section-card-header"><span>⚠️ Alumnos en riesgo</span><span style="font-size:10px;color:var(--text3);font-weight:400">&lt;50% asistencia</span></div>
+      <div style="padding:0 14px" id="att-risk-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGOS -->
+<div class="section" id="sec-pagos">
+  <div class="page-title">Control <span>de pagos</span></div>
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="switchPayTab('estado',this)">Estado</button>
+    <button class="tab-btn" onclick="switchPayTab('historial',this)">Historial</button>
+    <button class="tab-btn" onclick="switchPayTab('reporte',this)">Reporte</button>
+  </div>
+
+  <!-- TAB: ESTADO -->
+  <div class="tab-pane active" id="pay-tab-estado">
+    <div id="pay-alerts" class="alerts"></div>
+    <div class="section-card">
+      <div class="section-card-header" id="pay-month-header">Pagos</div>
+      <div id="pay-list"></div>
+    </div>
+    <div class="pay-summary" id="pay-summary" style="margin-top:12px"></div>
+  </div>
+
+  <!-- TAB: HISTORIAL -->
+  <div class="tab-pane" id="pay-tab-historial">
+    <div class="search-wrap">
+      <i class="ti ti-search"></i>
+      <input class="search-input" type="text" id="pay-hist-search" placeholder="Buscar alumno…" oninput="filterPayHist(this.value)">
+    </div>
+    <div id="pay-hist-list"></div>
+  </div>
+
+  <!-- TAB: REPORTE -->
+  <div class="tab-pane" id="pay-tab-reporte">
+    <div id="pay-reporte-content"></div>
+  </div>
+</div>
+
+<!-- CONFIG -->
+<div class="section" id="sec-config">
+  <div class="page-title">Configuración</div>
+
+  <div class="section-card" style="margin-bottom:14px">
+    <div class="section-card-header">Academia</div>
+    <div style="padding:14px">
+      <div class="form-row">
+        <label class="form-label">Nombre de la academia</label>
+        <input class="form-input" id="cfg-name" value="River Music">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Mensualidad predeterminada ($MXN)</label>
+        <input class="form-input" id="cfg-fee" type="number" value="300">
+      </div>
+      <button class="btn-primary" style="margin-top:4px" onclick="saveConfig()">Guardar configuración</button>
+    </div>
+  </div>
+
+  <div class="section-card" style="margin-bottom:14px">
+    <div class="section-card-header">Apariencia</div>
+    <div style="padding:0 14px">
+      <div class="settings-row">
+        <div><div class="settings-label">Modo oscuro</div><div class="settings-sub">Cambia la apariencia del sistema</div></div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card" style="margin-bottom:14px">
+    <div class="section-card-header">Respaldo de datos</div>
+    <div style="padding:0 14px">
+      <div class="settings-row">
+        <div><div class="settings-label">Exportar JSON</div><div class="settings-sub">Descarga todos los datos del sistema</div></div>
+        <button class="settings-btn" onclick="exportJSON()"><i class="ti ti-download" style="font-size:14px;margin-right:4px"></i>Exportar</button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-label">Importar JSON</div><div class="settings-sub">Restaura datos desde un respaldo</div></div>
+        <button class="settings-btn" onclick="document.getElementById('import-file').click()"><i class="ti ti-upload" style="font-size:14px;margin-right:4px"></i>Importar</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(this)">
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card" style="margin-bottom:14px">
+    <div class="section-card-header">Exportar a Excel</div>
+    <div style="padding:0 14px">
+      <div class="settings-row">
+        <div><div class="settings-label">Alumnos</div><div class="settings-sub">Lista completa de alumnos</div></div>
+        <button class="settings-btn success" onclick="exportExcel('alumnos')"><i class="ti ti-table-export" style="font-size:14px;margin-right:4px"></i>Excel</button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-label">Pagos</div><div class="settings-sub">Historial de pagos</div></div>
+        <button class="settings-btn success" onclick="exportExcel('pagos')"><i class="ti ti-table-export" style="font-size:14px;margin-right:4px"></i>Excel</button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-label">Asistencias</div><div class="settings-sub">Registro completo de asistencia</div></div>
+        <button class="settings-btn success" onclick="exportExcel('asistencias')"><i class="ti ti-table-export" style="font-size:14px;margin-right:4px"></i>Excel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card" style="margin-bottom:14px">
+    <div class="section-card-header">Zona de peligro</div>
+    <div style="padding:0 14px">
+      <div class="settings-row">
+        <div><div class="settings-label">Limpiar todos los datos</div><div class="settings-sub">Elimina alumnos, asistencia y pagos</div></div>
+        <button class="settings-btn danger" onclick="confirmClearAll()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;font-size:11px;color:var(--text3);padding:8px">
+    River Music Sistema de Gestión v3.0 · Todos los datos se guardan localmente
+  </div>
+</div>
+
+
+<!-- ═══ MODAL: NUEVO / EDITAR ALUMNO ═══ -->
+<div class="modal-overlay" id="modal-new" onclick="closeModalClick(event,'modal-new')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">
+      <span id="modal-new-title">Nuevo alumno</span>
+      <button class="modal-close" onclick="closeModal('modal-new')">&times;</button>
+    </div>
+
+    <!-- Datos básicos -->
+    <div class="form-row-2">
+      <div>
+        <label class="form-label">Nombre completo</label>
+        <input class="form-input" id="f-name" placeholder="Ej. Ana Torres">
+      </div>
+      <div>
+        <label class="form-label">Teléfono</label>
+        <input class="form-input" id="f-phone" placeholder="868-xxx-xxxx">
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div>
+        <label class="form-label">Instrumento</label>
+        <select class="form-select" id="f-inst">
+          <option>Piano</option><option>Guitarra</option><option>Voz</option>
+          <option>Teoría musical</option><option>Batería</option><option>Otro</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Nivel</label>
+        <select class="form-select" id="f-level">
+          <option>Principiante</option><option>Intermedio</option><option>Avanzado</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Horarios múltiples -->
+    <div class="form-section">
+      <div class="form-section-title">Horarios de clase</div>
+      <div class="form-hint" style="margin-bottom:8px">Agrega uno o más horarios. Puedes combinar días y horas libremente.</div>
+      <div class="schedule-builder" id="schedule-builder"></div>
+      <button class="add-slot-btn" onclick="addScheduleSlot()">
+        <i class="ti ti-plus" style="font-size:13px;margin-right:4px"></i>Agregar horario
+      </button>
+      <div class="form-row" style="margin-top:10px;margin-bottom:0">
+        <label class="form-label">Nota de horario <span style="font-weight:400;text-transform:none">(opcional)</span></label>
+        <input class="form-input" id="f-schedule" placeholder="Ej: Lunes y miércoles alternados">
+      </div>
+    </div>
+
+    <!-- Pago -->
+    <div class="form-section">
+      <div class="form-section-title">Pago</div>
+      <div class="form-row-3">
+        <div>
+          <label class="form-label">Mensualidad</label>
+          <input class="form-input" id="f-fee" type="number" placeholder="300">
+        </div>
+        <div>
+          <label class="form-label">Descuento</label>
+          <input class="form-input" id="f-discount" type="number" placeholder="0" min="0">
+        </div>
+        <div>
+          <label class="form-label">Tipo desc.</label>
+          <select class="form-select" id="f-discount-type">
+            <option value="none">Ninguno</option>
+            <option value="pct">% Porcentaje</option>
+            <option value="fixed">$ Fijo</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Fecha de inscripción</label>
+        <input class="form-input" id="f-enrolled" type="date">
+        <div class="form-hint">La fecha de vencimiento se calcula desde esta fecha cada mes.</div>
+      </div>
+    </div>
+
+    <!-- Estado -->
+    <div class="form-row" style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
+      <label class="form-label" style="margin:0">Alumno activo</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="f-active" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <!-- Notas -->
+    <div class="form-row">
+      <label class="form-label">Observaciones</label>
+      <textarea class="form-input form-textarea" id="f-notes" placeholder="Notas adicionales…"></textarea>
+    </div>
+
+    <input type="hidden" id="f-edit-id" value="">
+    <button class="btn-primary" onclick="saveStudent()">Guardar alumno</button>
+  </div>
+</div>
+
+<!-- ═══ MODAL: DETALLE ALUMNO ═══ -->
+<div class="modal-overlay" id="modal-detail" onclick="closeModalClick(event,'modal-detail')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">
+      <span id="detail-name">Detalle</span>
+      <button class="modal-close" onclick="closeModal('modal-detail')">&times;</button>
+    </div>
+    <div id="detail-body"></div>
+    <div class="detail-actions">
+      <button class="btn-edit" onclick="editFromDetail()"><i class="ti ti-pencil" style="font-size:13px"></i> Editar</button>
+      <button class="btn-pay" onclick="openPayModal(currentDetailId)"><i class="ti ti-coin" style="font-size:13px"></i> Registrar pago</button>
+      <button class="btn-danger" onclick="confirmDelete()"><i class="ti ti-trash" style="font-size:13px"></i> Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: REGISTRAR PAGO ═══ -->
+<div class="modal-overlay" id="modal-pay" onclick="closeModalClick(event,'modal-pay')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">
+      <span id="pay-modal-title">Registrar pago</span>
+      <button class="modal-close" onclick="closeModal('modal-pay')">&times;</button>
+    </div>
+    <div class="form-row-2">
+      <div>
+        <label class="form-label">Monto ($MXN)</label>
+        <input class="form-input" id="pm-amount" type="number" placeholder="300">
+      </div>
+      <div>
+        <label class="form-label">Fecha</label>
+        <input class="form-input" id="pm-date" type="date">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Método de pago</label>
+      <select class="form-select" id="pm-method">
+        <option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option>
+        <option>CoDi / SPEI</option><option>Otro</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Observaciones</label>
+      <input class="form-input" id="pm-notes" placeholder="Ej: Pago de junio">
+    </div>
+    <input type="hidden" id="pm-student-id">
+    <input type="hidden" id="pm-edit-idx" value="">
+    <button class="btn-primary" onclick="savePayment()">Confirmar pago</button>
+  </div>
+</div>
+
+<!-- ═══ MODAL: SLOT CALENDARIO ═══ -->
+<div class="modal-overlay" id="modal-slot" onclick="closeModalClick(event,'modal-slot')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">
+      <span id="slot-modal-title">Horario</span>
+      <button class="modal-close" onclick="closeModal('modal-slot')">&times;</button>
+    </div>
+    <div id="slot-modal-body"></div>
+    <div style="margin-top:14px">
+      <button class="btn-secondary" onclick="openNewFromSlot()">
+        <i class="ti ti-plus" style="font-size:14px"></i> Agregar alumno a este horario
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: HISTORIAL PAGOS ═══ -->
+<div class="modal-overlay" id="modal-pay-hist" onclick="closeModalClick(event,'modal-pay-hist')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">
+      <span id="pay-hist-title">Historial</span>
+      <button class="modal-close" onclick="closeModal('modal-pay-hist')">&times;</button>
+    </div>
+    <div id="pay-hist-body"></div>
+  </div>
+</div>
+
+<!-- ═══ CONFIRM DIALOG ═══ -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirm-title">¿Confirmar acción?</div>
+    <div class="confirm-msg" id="confirm-msg">Esta acción no se puede deshacer.</div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="closeConfirm()">Cancelar</button>
+      <button class="confirm-ok" id="confirm-ok-btn" onclick="runConfirm()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="openNewModal()" title="Agregar alumno"><i class="ti ti-plus"></i></button>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="showSec('dashboard',this)" id="nav-dashboard">
+    <i class="ti ti-layout-dashboard"></i>Dashboard
+  </button>
+  <button class="nav-item" onclick="showSec('agenda',this)" id="nav-agenda">
+    <i class="ti ti-calendar"></i>Agenda
+  </button>
+  <button class="nav-item" onclick="showSec('alumnos',this)" id="nav-alumnos">
+    <i class="ti ti-users"></i>Alumnos
+  </button>
+  <button class="nav-item" onclick="showSec('asistencia',this)" id="nav-asistencia">
+    <i class="ti ti-check"></i>Asistencia
+  </button>
+  <button class="nav-item" onclick="showSec('pagos',this)" id="nav-pagos">
+    <i class="ti ti-coin"></i>Pagos
+  </button>
+</nav>
+
+
+<script>
+/* ══════════════════════════════════════════════════════
+   RIVER MUSIC v3 — JavaScript
+   ══════════════════════════════════════════════════════ */
+
+// ─── CONSTANTES ─────────────────────────────────────────────────────────────
+const DAYS      = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const DAYS_FULL = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+const HOURS     = ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
+const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const COLORS    = ['#0f1f3d','#2d5a0a','#7a3010','#1a3a80','#6a1a4a','#3b6d11','#8b5a00','#1a4a6a'];
+
+// ─── DATOS POR DEFECTO ──────────────────────────────────────────────────────
+const DEFAULT_STUDENTS = [
+  {id:1,name:'Ana Torres',phone:'868-100-0001',inst:'Piano',level:'Intermedio',schedules:[{day:'Martes',time:'16:00'}],schedule:'Martes 4 PM a 5 PM',fee:300,discount:0,discountType:'none',paid:true,active:true,notes:'Muy dedicada',enrolled:'2024-09-01',payHistory:[]},
+  {id:2,name:'Luis Peña',phone:'868-100-0002',inst:'Guitarra',level:'Principiante',schedules:[{day:'Jueves',time:'17:00'}],schedule:'Jueves 5 PM a 6 PM',fee:300,discount:0,discountType:'none',paid:true,active:true,notes:'',enrolled:'2024-10-15',payHistory:[]},
+  {id:3,name:'Carlos Méndez',phone:'868-100-0003',inst:'Piano',level:'Avanzado',schedules:[{day:'Lunes',time:'10:00'}],schedule:'Lunes 10 AM a 12 PM',fee:400,discount:0,discountType:'none',paid:false,active:true,notes:'8 días vencido',enrolled:'2024-07-01',payHistory:[]},
+  {id:4,name:'Sofía Ramírez',phone:'868-100-0004',inst:'Voz',level:'Principiante',schedules:[{day:'Sábado',time:'11:00'}],schedule:'Sábado 11 AM',fee:300,discount:0,discountType:'none',paid:false,active:true,notes:'3 días vencido',enrolled:'2025-01-20',payHistory:[]},
+  {id:5,name:'Mariana Vega',phone:'868-100-0005',inst:'Guitarra',level:'Intermedio',schedules:[{day:'Miércoles',time:'18:00'}],schedule:'Miércoles 6 PM a 7 PM',fee:300,discount:0,discountType:'none',paid:true,active:true,notes:'',enrolled:'2024-11-01',payHistory:[]},
+  {id:6,name:'Diego Salinas',phone:'868-100-0006',inst:'Piano',level:'Principiante',schedules:[{day:'Viernes',time:'16:00'}],schedule:'Viernes 4 PM a 5 PM',fee:300,discount:0,discountType:'none',paid:true,active:true,notes:'',enrolled:'2025-02-01',payHistory:[]},
+  {id:7,name:'Paola Garza',phone:'868-100-0007',inst:'Voz',level:'Avanzado',schedules:[{day:'Martes',time:'18:00'},{day:'Jueves',time:'18:00'}],schedule:'Martes y Jueves 6 PM a 8 PM',fee:400,discount:50,discountType:'fixed',paid:true,active:true,notes:'Soprano · Beca $50',enrolled:'2023-05-01',payHistory:[]},
+  {id:8,name:'Roberto Cruz',phone:'868-100-0008',inst:'Guitarra',level:'Intermedio',schedules:[{day:'Jueves',time:'16:00'}],schedule:'Jueves 4 PM a 5 PM',fee:300,discount:0,discountType:'none',paid:true,active:true,notes:'',enrolled:'2024-08-10',payHistory:[]},
+  {id:9,name:'Valeria Mora',phone:'868-100-0009',inst:'Piano',level:'Principiante',schedules:[{day:'Sábado',time:'16:00'}],schedule:'Sábado 4 PM a 5 PM',fee:300,discount:0,discountType:'none',paid:true,active:true,notes:'',enrolled:'2025-03-05',payHistory:[]},
+  {id:10,name:'Héctor Ríos',phone:'868-100-0010',inst:'Guitarra',level:'Avanzado',schedules:[{day:'Viernes',time:'18:00'}],schedule:'Viernes 6 PM a 8 PM',fee:400,discount:0,discountType:'none',paid:true,active:true,notes:'',enrolled:'2023-11-01',payHistory:[]},
+  {id:11,name:'Fernanda Luna',phone:'868-100-0011',inst:'Voz',level:'Intermedio',schedules:[{day:'Sábado',time:'17:00'}],schedule:'Sábado 5 PM a 6 PM',fee:300,discount:0,discountType:'none',paid:true,active:true,notes:'',enrolled:'2024-06-01',payHistory:[]},
+  {id:12,name:'Miguel Flores',phone:'868-100-0012',inst:'Piano',level:'Intermedio',schedules:[{day:'Jueves',time:'10:00'}],schedule:'Jueves 10 AM a 11 AM',fee:300,discount:0,discountType:'none',paid:true,active:true,notes:'',enrolled:'2024-12-01',payHistory:[]},
+];
+
+// ─── STORAGE ────────────────────────────────────────────────────────────────
+function load(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; }
+}
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+
+let students   = load('rm_students3', null) || migrateStudents(load('rm_students', DEFAULT_STUDENTS));
+let attendance = load('rm_attendance2', {});
+let nextId     = load('rm_nextid3', 13);
+let config     = load('rm_config3', { name: 'River Music', defaultFee: 300, darkMode: false });
+let currentDetailId = null;
+let currentAttDate  = new Date();
+let currentHistDate = new Date();
+let currentSlotDay  = null;
+let currentSlotTime = null;
+let activeFilter    = 'todos';
+let agendaView      = 'grid';
+let currentWeekOffset = 0;
+let confirmCallback = null;
+
+// ─── MIGRACIÓN: v2 → v3 (agrega schedules[] si no existe) ──────────────────
+function migrateStudents(arr) {
+  return arr.map(s => {
+    if (!s.schedules) {
+      s.schedules = (s.day && s.time) ? [{day: s.day, time: s.time}] : [];
+    }
+    return s;
+  });
+}
+
+function saveAll() {
+  save('rm_students3',   students);
+  save('rm_attendance2', attendance);
+  save('rm_nextid3',     nextId);
+  save('rm_config3',     config);
+}
+
+// ─── UTIL ───────────────────────────────────────────────────────────────────
+function dateKey(d) { return d.toISOString().slice(0,10); }
+function todayKey() { return dateKey(new Date()); }
+
+function netFee(s) {
+  if (!s.discountType || s.discountType === 'none') return s.fee;
+  if (s.discountType === 'pct') return Math.round(s.fee * (1 - (s.discount||0)/100));
+  if (s.discountType === 'fixed') return Math.max(0, s.fee - (s.discount||0));
+  return s.fee;
+}
+
+// Calcula días hasta el próximo vencimiento basado en fecha de inscripción
+// Lógica: mismo día del mes que enrolled, cada mes
+function daysUntilPayday(s) {
+  const now = new Date();
+  if (s.enrolled) {
+    const enrolledDay = parseInt(s.enrolled.slice(8, 10));
+    // Intentar este mes
+    let tryDate = new Date(now.getFullYear(), now.getMonth(), enrolledDay);
+    if (tryDate <= now) tryDate = new Date(now.getFullYear(), now.getMonth() + 1, enrolledDay);
+    return Math.round((tryDate - now) / 86400000);
+  }
+  // Fallback: payday (compatibilidad v2)
+  if (s.payday) {
+    const tryDate = new Date(now.getFullYear(), now.getMonth(), s.payday);
+    if (tryDate <= now) tryDate.setMonth(tryDate.getMonth() + 1);
+    return Math.round((tryDate - now) / 86400000);
+  }
+  return 30;
+}
+
+function nextPayDate(s) {
+  const now = new Date();
+  if (s.enrolled) {
+    const enrolledDay = parseInt(s.enrolled.slice(8, 10));
+    let d = new Date(now.getFullYear(), now.getMonth(), enrolledDay);
+    if (d <= now) d = new Date(now.getFullYear(), now.getMonth() + 1, enrolledDay);
+    return d.toLocaleDateString('es-MX', {day:'numeric',month:'short'});
+  }
+  if (s.payday) {
+    let d = new Date(now.getFullYear(), now.getMonth(), s.payday);
+    if (d <= now) d.setMonth(d.getMonth() + 1);
+    return d.toLocaleDateString('es-MX', {day:'numeric',month:'short'});
+  }
+  return '—';
+}
+
+// Obtiene todos los slots (día/hora) de un alumno — soporta v2 y v3
+function getStudentSlots(s) {
+  if (s.schedules && s.schedules.length) return s.schedules;
+  if (s.day && s.time) return [{day: s.day, time: s.time}];
+  return [];
+}
+
+// ─── DARK MODE ──────────────────────────────────────────────────────────────
+function toggleDarkMode() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const newMode = !isDark;
+  document.documentElement.setAttribute('data-theme', newMode ? 'dark' : 'light');
+  document.getElementById('dark-icon').className = newMode ? 'ti ti-sun' : 'ti ti-moon';
+  const toggle = document.getElementById('dark-mode-toggle');
+  if (toggle) toggle.checked = newMode;
+  config.darkMode = newMode;
+  saveAll();
+}
+
+// ─── CONFIRM DIALOG ─────────────────────────────────────────────────────────
+function showConfirm(title, msg, cb, danger=true) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-ok-btn').className = 'confirm-ok' + (danger ? ' danger' : '');
+  confirmCallback = cb;
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+function closeConfirm() { document.getElementById('confirm-overlay').classList.remove('open'); confirmCallback = null; }
+function runConfirm() { closeConfirm(); if (confirmCallback) confirmCallback(); }
+
+// ─── NAV ────────────────────────────────────────────────────────────────────
+function showSec(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  const renders = {
+    dashboard:  renderDashboard,
+    agenda:     renderCalendar,
+    alumnos:    () => renderStudents(filteredStudents()),
+    asistencia: renderAttendance,
+    pagos:      renderPayments,
+  };
+  if (renders[id]) renders[id]();
+}
+
+// ─── HEADER DATE ────────────────────────────────────────────────────────────
+(function() {
+  const now = new Date();
+  document.getElementById('header-date').innerHTML =
+    now.toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'}).replace('.','') + '<br>Reynosa, Tamps.';
+})();
+
+// ─── INIT DARK MODE ─────────────────────────────────────────────────────────
+if (config.darkMode) {
+  document.documentElement.setAttribute('data-theme', 'dark');
+  document.getElementById('dark-icon').className = 'ti ti-sun';
+  const toggle = document.getElementById('dark-mode-toggle');
+  if (toggle) toggle.checked = true;
+}
+
+// ═══════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════
+function renderDashboard() {
+  const activeStudents = students.filter(s => s.active !== false);
+  const total   = students.length;
+  const active  = activeStudents.length;
+  const paid    = activeStudents.filter(s=>s.paid).length;
+  const unpaid  = activeStudents.filter(s=>!s.paid).length;
+  const income  = activeStudents.filter(s=>s.paid).reduce((a,s)=>a+netFee(s),0);
+  const pending = activeStudents.filter(s=>!s.paid).reduce((a,s)=>a+netFee(s),0);
+  const expected = income + pending;
+  const pctCollect = expected > 0 ? Math.round(income/expected*100) : 0;
+
+  // Alertas
+  const al = document.getElementById('dash-alerts');
+  al.innerHTML = '';
+  const overdue = activeStudents.filter(s=>!s.paid);
+  if (overdue.length)
+    al.innerHTML += `<div class="alert danger"><i class="ti ti-alert-circle"></i><div><strong>${overdue.length} pago(s) vencido(s):</strong> ${overdue.map(s=>s.name).join(', ')}</div></div>`;
+  const soon3 = activeStudents.filter(s=>s.paid && daysUntilPayday(s)<=3);
+  if (soon3.length)
+    al.innerHTML += `<div class="alert warning"><i class="ti ti-clock"></i><div><strong>Pago próximo (≤3 días):</strong> ${soon3.map(s=>s.name+' · '+nextPayDate(s)).join(', ')}</div></div>`;
+
+  // KPIs
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-card accent">
+      <div class="kpi-label">Alumnos activos</div>
+      <div class="kpi-value">${active}</div>
+      <div class="kpi-sub">${paid} al corriente · ${unpaid} vencido</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total registrados</div>
+      <div class="kpi-value">${total}</div>
+      <div class="prog-wrap"><div class="prog-fill green" style="width:${total?Math.min(100,Math.round(active/total*100)):0}%"></div></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Ingresos mes</div>
+      <div class="kpi-value">$${income.toLocaleString()}</div>
+      <div class="kpi-sub">${pctCollect}% de cobranza</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Pendiente</div>
+      <div class="kpi-value" style="color:var(--danger)">$${pending.toLocaleString()}</div>
+      <div class="prog-wrap"><div class="prog-fill red" style="width:${pending?Math.min(100,Math.round(pending/expected*100)):0}%"></div></div>
+    </div>`;
+
+  // Gráfica: instrumentos
+  const instCount = {};
+  activeStudents.forEach(s => { instCount[s.inst] = (instCount[s.inst]||0)+1; });
+  const instMax = Math.max(1, ...Object.values(instCount));
+  document.getElementById('chart-inst').innerHTML = Object.entries(instCount)
+    .sort((a,b)=>b[1]-a[1])
+    .map(([k,v],i) => {
+      const cls = ['bf-navy','bf-gold','bf-green','bf-coral','bf-blue'][i%5];
+      return `<div class="bar-row"><span class="bar-lbl">${k}</span><div class="bar-track"><div class="bar-fill ${cls}" style="width:${Math.round(v/instMax*100)}%">${v}</div></div></div>`;
+    }).join('') || '<div class="empty" style="padding:16px"><i class="ti ti-music-off"></i>Sin datos</div>';
+
+  // Gráfica: horas más solicitadas
+  const hourCount = {};
+  activeStudents.forEach(s => { getStudentSlots(s).forEach(slot => { if(slot.time) hourCount[slot.time] = (hourCount[slot.time]||0)+1; }); });
+  const hourMax = Math.max(1, ...Object.values(hourCount));
+  document.getElementById('chart-hours').innerHTML = Object.entries(hourCount)
+    .sort((a,b)=>b[1]-a[1]).slice(0,6)
+    .map(([k,v],i) => {
+      const cls = ['bf-navy','bf-navy','bf-gold','bf-gold','bf-green','bf-green'][i];
+      return `<div class="bar-row"><span class="bar-lbl">${k}</span><div class="bar-track"><div class="bar-fill ${cls}" style="width:${Math.round(v/hourMax*100)}%">${v}</div></div></div>`;
+    }).join('') || '<div class="empty" style="padding:16px"><i class="ti ti-clock-off"></i>Sin datos</div>';
+
+  // Gráfica: días
+  const dayCount = {};
+  DAYS_FULL.forEach(d=>dayCount[d]=0);
+  activeStudents.forEach(s => { getStudentSlots(s).forEach(slot => { if(dayCount[slot.day]!==undefined) dayCount[slot.day]++; }); });
+  const dayMax = Math.max(1, ...Object.values(dayCount));
+  document.getElementById('chart-days').innerHTML = DAYS.map((d,i) => {
+    const v = dayCount[DAYS_FULL[i]]||0;
+    const cls = v===dayMax && v>0 ? 'bf-coral':'bf-navy';
+    return `<div class="bar-row"><span class="bar-lbl">${d}</span><div class="bar-track"><div class="bar-fill ${cls}" style="width:${Math.round(v/dayMax*100)}%">${v}</div></div></div>`;
+  }).join('');
+
+  // Próximos vencimientos
+  const upcoming = activeStudents
+    .filter(s => s.paid)
+    .map(s => ({ s, days: daysUntilPayday(s) }))
+    .sort((a,b) => a.days - b.days)
+    .slice(0, 5);
+
+  document.getElementById('upcoming-list').innerHTML = upcoming.length
+    ? upcoming.map(({s,days}) => {
+        const badge = days <= 3
+          ? `<span class="venc-badge urgent">⚠ ${days}d</span>`
+          : days <= 7
+          ? `<span class="venc-badge soon">${days}d</span>`
+          : `<span class="venc-badge">${days}d</span>`;
+        return `<div class="pay-row">
+          <div>
+            <div class="pay-name">${s.name}</div>
+            <div class="pay-detail">${s.inst} · vence ${nextPayDate(s)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;color:var(--text3)">$${netFee(s)}</span>
+            ${badge}
+          </div>
+        </div>`;
+      }).join('')
+    : '<div class="empty" style="padding:16px 14px"><i class="ti ti-check"></i>Sin vencimientos próximos</div>';
+}
+
+// ═══════════════════════════════════════════════════════
+// AGENDA / CALENDARIO SEMANAL
+// ═══════════════════════════════════════════════════════
+
+function setAgendaView(view, btn) {
+  agendaView = view;
+  document.querySelectorAll('.cal-btn').forEach(b => b.classList.remove('active-view'));
+  btn.classList.add('active-view');
+  document.getElementById('agenda-grid-view').style.display = view === 'grid' ? 'block' : 'none';
+  document.getElementById('agenda-list-view').style.display = view === 'list'  ? 'block' : 'none';
+  renderCalendar();
+}
+
+function changeWeek(delta) {
+  if (delta === 0) { currentWeekOffset = 0; }
+  else { currentWeekOffset += delta; }
+  renderCalendar();
+}
+
+// Construye mapa de slots considerando schedules[]
+function buildSlotMap() {
+  const slotMap = {};
+  const activeStudents = students.filter(s => s.active !== false);
+  activeStudents.forEach(s => {
+    getStudentSlots(s).forEach(slot => {
+      const di = DAYS_FULL.indexOf(slot.day);
+      if (di >= 0 && slot.time) {
+        const k = di + '-' + slot.time;
+        if (!slotMap[k]) slotMap[k] = [];
+        slotMap[k].push(s);
+      }
+    });
+  });
+  return slotMap;
+}
+
+// Detecta conflictos: mismo alumno en 2 slots solapados el mismo día
+function detectConflicts(slotMap) {
+  const conflicts = new Set();
+  // Detectar mismo alumno en múltiples slots del mismo día-hora
+  const studentDayHour = {};
+  students.filter(s => s.active !== false).forEach(s => {
+    const slots = getStudentSlots(s);
+    // Agrupar por día
+    const byDay = {};
+    slots.forEach(sl => {
+      if (!byDay[sl.day]) byDay[sl.day] = [];
+      byDay[sl.day].push(sl.time);
+    });
+    // No hay conflicto individual aquí, pero podemos detectar duplicados exactos
+  });
+  // Detectar slots con 2+ alumnos compartiendo el MISMO horario exacto pero distintos grupos
+  // En este contexto "conflicto" = mismo alumno registrado en 2 slots que se solapan
+  // Por ahora: marcamos como conflicto si un alumno aparece 2+ veces en el mismo día-hora
+  const seen = {}; // studentId → set de dia+time
+  students.filter(s => s.active !== false).forEach(s => {
+    const slots = getStudentSlots(s);
+    const dayTimes = {};
+    slots.forEach(sl => {
+      const k = sl.day + '-' + sl.time;
+      if (dayTimes[k]) conflicts.add(k); // duplicado exacto
+      dayTimes[k] = true;
+    });
+  });
+  return conflicts;
+}
+
+function renderCalendar() {
+  const slotMap   = buildSlotMap();
+  const conflicts = detectConflicts(slotMap);
+  const hasConflicts = conflicts.size > 0;
+  document.getElementById('conflict-alert').style.display = hasConflicts ? 'block' : 'none';
+
+  // Calcular etiqueta de semana
+  const now = new Date();
+  const monday = new Date(now);
+  const dayOfWeek = (now.getDay() + 6) % 7;
+  monday.setDate(now.getDate() - dayOfWeek + (currentWeekOffset * 7));
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  document.getElementById('week-label').textContent =
+    monday.toLocaleDateString('es-MX',{day:'numeric',month:'short'}) + ' – ' +
+    sunday.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
+
+  const todayIdx = (new Date().getDay()+6)%7;
+
+  if (agendaView === 'grid') {
+    const grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+    // Header
+    grid.innerHTML += '<div></div>';
+    DAYS.forEach((d,i) => {
+      const isToday = (i === todayIdx) && (currentWeekOffset === 0);
+      const dateNum = new Date(monday); dateNum.setDate(monday.getDate() + i);
+      grid.innerHTML += `<div class="cal-head-cell ${isToday?'today':''}">
+        ${d}<br><span style="font-size:9px;opacity:.7">${dateNum.getDate()}</span>
+      </div>`;
+    });
+    HOURS.forEach(h => {
+      grid.innerHTML += `<div class="cal-time">${h}</div>`;
+      DAYS.forEach((d,di) => {
+        const key   = di + '-' + h;
+        const arr   = slotMap[key] || [];
+        const n     = arr.length;
+        const isConflict = conflicts.has(key);
+        if (n === 0) {
+          grid.innerHTML += `<div class="cal-slot available" onclick="openNewWithSlot('${DAYS_FULL[di]}','${h}')">+</div>`;
+        } else {
+          const cls = isConflict ? 'conflict' : n >= 5 ? 'busy3' : n >= 3 ? 'busy2' : 'busy1';
+          const pct = Math.min(100, Math.round(n/8*100));
+          grid.innerHTML += `<div class="cal-slot ${cls}" onclick="openSlotModal('${DAYS_FULL[di]}','${h}')">
+            <span class="slot-count">${n}</span>
+            <div class="slot-bar"><div class="slot-bar-fill" style="width:${pct}%"></div></div>
+          </div>`;
+        }
+      });
+    });
+  } else {
+    // Vista lista
+    const container = document.getElementById('agenda-list-content');
+    container.innerHTML = '';
+    let anyContent = false;
+    DAYS_FULL.forEach((dayName, di) => {
+      const slotsForDay = [];
+      HOURS.forEach(h => {
+        const key = di + '-' + h;
+        const arr = slotMap[key];
+        if (arr && arr.length) slotsForDay.push({ time: h, students: arr, conflict: conflicts.has(key) });
+      });
+      if (!slotsForDay.length) return;
+      anyContent = true;
+      const isToday = (di === todayIdx) && (currentWeekOffset === 0);
+      let html = `<div class="agenda-day-group">
+        <div class="agenda-day-header">${dayName}${isToday?' <span class="badge badge-amber" style="font-size:9px;padding:1px 6px">Hoy</span>':''}</div>`;
+      slotsForDay.forEach(({ time, students: arr, conflict }) => {
+        const names = arr.map(s => s.name.split(' ')[0]).join(', ');
+        html += `<div class="agenda-slot-item ${conflict?'':''}  " onclick="openSlotModal('${dayName}','${time}')">
+          <div class="agenda-slot-time">${time}</div>
+          <div class="agenda-slot-names">${names}</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            ${conflict ? '<span class="conflict-badge">Conflicto</span>' : ''}
+            <span class="agenda-slot-count">${arr.length} alumno${arr.length>1?'s':''}</span>
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+      container.innerHTML += html;
+    });
+    if (!anyContent) {
+      container.innerHTML = '<div class="agenda-empty"><i class="ti ti-calendar-off" style="font-size:28px;display:block;margin-bottom:8px;opacity:.3"></i>No hay clases programadas esta semana</div>';
+    }
+  }
+}
+
+function openSlotModal(day, time) {
+  currentSlotDay  = day;
+  currentSlotTime = time;
+  const arr = students.filter(s => s.active!==false && getStudentSlots(s).some(sl => sl.day===day && sl.time===time));
+  document.getElementById('slot-modal-title').textContent = `${day} ${time}`;
+  document.getElementById('slot-modal-body').innerHTML = arr.length
+    ? arr.map(s => {
+        const bg = COLORS[s.id % COLORS.length];
+        const initials = s.name.split(' ').slice(0,2).map(w=>w[0]).join('');
+        return `<div class="rank-item" onclick="closeModal('modal-slot');openDetail(${s.id})" style="cursor:pointer">
+          <div class="avatar" style="width:32px;height:32px;font-size:12px;background:${bg}18;color:${bg}">${initials}</div>
+          <div>
+            <div style="font-size:13px;font-weight:600">${s.name}</div>
+            <div style="font-size:11px;color:var(--text3)">${s.inst} · ${s.level}</div>
+          </div>
+          <div style="margin-left:auto">${s.paid?'<span class="badge badge-green">Al día</span>':'<span class="badge badge-red">Vencido</span>'}</div>
+        </div>`;
+      }).join('')
+    : '<div class="empty" style="padding:16px">Sin alumnos en este horario</div>';
+  document.getElementById('modal-slot').classList.add('open');
+}
+
+// ═══════════════════════════════════════════════════════
+// ALUMNOS
+// ═══════════════════════════════════════════════════════
+function filteredStudents() {
+  const q = (document.getElementById('student-search')?.value || '').toLowerCase();
+  let list = students;
+  if (activeFilter === 'activo')   list = list.filter(s => s.active !== false);
+  if (activeFilter === 'inactivo') list = list.filter(s => s.active === false);
+  if (activeFilter === 'vencido')  list = list.filter(s => s.active !== false && !s.paid);
+  if (['Piano','Guitarra','Voz','Batería','Teoría musical'].includes(activeFilter))
+    list = list.filter(s => s.inst === activeFilter);
+  if (q) list = list.filter(s =>
+    s.name.toLowerCase().includes(q) ||
+    s.inst.toLowerCase().includes(q) ||
+    (s.schedule||'').toLowerCase().includes(q) ||
+    getStudentSlots(s).some(sl => sl.day.toLowerCase().includes(q) || sl.time.includes(q)) ||
+    (s.phone||'').includes(q)
+  );
+  return list;
+}
+
+function setFilter(el, filter) {
+  activeFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderStudents(filteredStudents());
+}
+
+function filterStudents(q) { renderStudents(filteredStudents()); }
+
+function renderStudents(list) {
+  const el = document.getElementById('student-list');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty"><i class="ti ti-user-off"></i>No se encontraron alumnos</div>'; return;
+  }
+  el.innerHTML = list.map(s => {
+    const initials = s.name.split(' ').slice(0,2).map(w=>w[0]).join('');
+    const bg = COLORS[s.id % COLORS.length];
+    const payBadge = !s.active
+      ? '<span class="badge badge-gray">Inactivo</span>'
+      : s.paid
+      ? '<span class="badge badge-green">Al corriente</span>'
+      : '<span class="badge badge-red">Vencido</span>';
+    const nf = netFee(s);
+    const discLabel = s.discountType && s.discountType !== 'none'
+      ? ` <span style="color:var(--gold);font-size:9px">(beca)</span>` : '';
+    const slots = getStudentSlots(s);
+    const sched = slots.length
+      ? slots.map(sl => sl.day.slice(0,3)+' '+sl.time).join(' · ')
+      : (s.schedule || '—');
+    const scheduleTags = slots.length
+      ? `<div class="schedule-tags">${slots.map(sl=>`<span class="schedule-tag">${sl.day.slice(0,3)} ${sl.time}</span>`).join('')}</div>`
+      : '';
+    return `<div class="student-card ${s.active===false?'sc-inactive':''}" onclick="openDetail(${s.id})">
+      <div class="sc-top">
+        <div class="avatar" style="background:${bg}18;color:${bg}">${initials}</div>
+        <div style="flex:1">
+          <div class="sc-name">${s.name}</div>
+          <div class="sc-sub">${s.inst} · ${s.level}</div>
+        </div>
+        ${payBadge}
+      </div>
+      <div class="sc-meta">
+        <span><span class="meta-lbl">Mensualidad </span><span class="meta-val">$${nf}${discLabel}</span></span>
+        <span><span class="meta-lbl">Vence </span><span class="meta-val">${nextPayDate(s)}</span></span>
+        <span><span class="meta-lbl">Tel </span><span class="meta-val">${s.phone||'—'}</span></span>
+        <span><span class="meta-lbl">Inscrito </span><span class="meta-val">${s.enrolled||'—'}</span></span>
+        ${s.notes?`<span style="grid-column:span 2"><span class="meta-lbl">Obs </span><span class="meta-val">${s.notes}</span></span>`:''}
+      </div>
+      ${scheduleTags}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// ASISTENCIA
+// ═══════════════════════════════════════════════════════
+let currentAttTab = 'hoy';
+
+function switchAttTab(tab, btn) {
+  currentAttTab = tab;
+  document.querySelectorAll('#sec-asistencia .tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#sec-asistencia .tab-pane').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('att-tab-'+tab).classList.add('active');
+  if (tab==='hoy')          renderAttendanceDay();
+  if (tab==='historial')    renderAttendanceHist();
+  if (tab==='estadisticas') renderAttendanceStats();
+}
+
+function renderAttendance() { renderAttendanceDay(); }
+
+function changeAttDate(delta) {
+  currentAttDate = new Date(currentAttDate);
+  currentAttDate.setDate(currentAttDate.getDate()+delta);
+  renderAttendanceDay();
+}
+
+function renderAttendanceDay() {
+  const dk      = dateKey(currentAttDate);
+  const dayIdx  = (currentAttDate.getDay()+6)%7;
+  const dayName = DAYS_FULL[dayIdx];
+  document.getElementById('att-date-label').textContent =
+    currentAttDate.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('att-date-sub').textContent = dk===todayKey()?'Hoy':'';
+
+  // Alumnos del día (busca en schedules[])
+  const dayStudents = students.filter(s => s.active!==false && getStudentSlots(s).some(sl => sl.day===dayName));
+  const dayAtt = attendance[dk]||{};
+  const ok   = dayStudents.filter(s=>dayAtt[s.id]?.s==='ok').length;
+  const no   = dayStudents.filter(s=>dayAtt[s.id]?.s==='no').length;
+  const late = dayStudents.filter(s=>dayAtt[s.id]?.s==='late').length;
+  const jus  = dayStudents.filter(s=>dayAtt[s.id]?.s==='jus').length;
+  document.getElementById('att-summary').innerHTML = `
+    <div class="att-sum-card"><div class="att-sum-n" style="color:#1a5e28">${ok}</div><div class="att-sum-l">Asistieron</div></div>
+    <div class="att-sum-card"><div class="att-sum-n" style="color:var(--danger)">${no}</div><div class="att-sum-l">Faltaron</div></div>
+    <div class="att-sum-card"><div class="att-sum-n" style="color:var(--warning)">${late}</div><div class="att-sum-l">Retardos</div></div>
+    <div class="att-sum-card"><div class="att-sum-n" style="color:#1a3a80">${jus}</div><div class="att-sum-l">Justific.</div></div>`;
+  const el = document.getElementById('attend-list');
+  if (!dayStudents.length) {
+    el.innerHTML='<div class="empty"><i class="ti ti-calendar-off"></i>No hay clases programadas este día</div>';
+    return;
+  }
+  el.innerHTML = dayStudents
+    .sort((a,b) => {
+      const aTime = getStudentSlots(a).find(sl=>sl.day===dayName)?.time || '';
+      const bTime = getStudentSlots(b).find(sl=>sl.day===dayName)?.time || '';
+      return aTime.localeCompare(bTime);
+    })
+    .map(s => {
+      const att = dayAtt[s.id];
+      const slotTime = getStudentSlots(s).find(sl=>sl.day===dayName)?.time || '—';
+      const stamp = att ? `<div class="ac-stamp"><i class="ti ti-clock" style="font-size:11px"></i> ${att.ts}</div>` : '';
+      return `<div class="attend-card">
+        <div class="ac-top">
+          <div><div style="font-size:14px;font-weight:600">${s.name}</div><div style="font-size:11px;color:var(--text3)">${s.inst} · ${slotTime}</div></div>
+          <div class="ac-btns">
+            <button class="ac-btn ${att?.s==='ok'?'s-ok':''}"    onclick="markAtt('${dk}',${s.id},'ok')">✓ Asistió</button>
+            <button class="ac-btn ${att?.s==='no'?'s-no':''}"    onclick="markAtt('${dk}',${s.id},'no')">✗ Faltó</button>
+            <button class="ac-btn ${att?.s==='late'?'s-late':''}" onclick="markAtt('${dk}',${s.id},'late')">⏱ Retardo</button>
+            <button class="ac-btn ${att?.s==='jus'?'s-jus':''}"   onclick="markAtt('${dk}',${s.id},'jus')">📋 Justif.</button>
+          </div>
+        </div>
+        ${stamp}
+      </div>`;
+    }).join('');
+}
+
+function markAtt(dk, id, status) {
+  if (!attendance[dk]) attendance[dk]={};
+  attendance[dk][id]={s:status,ts:new Date().toLocaleString('es-MX',{dateStyle:'short',timeStyle:'short'})};
+  saveAll();
+  renderAttendanceDay();
+}
+
+// Historial mensual — rediseñado con colores por tipo dominante
+let histSelectedDay = null;
+function changeHistMonth(delta) {
+  currentHistDate = new Date(currentHistDate.getFullYear(), currentHistDate.getMonth()+delta, 1);
+  histSelectedDay = null;
+  renderAttendanceHist();
+}
+function renderAttendanceHist() {
+  const y=currentHistDate.getFullYear(), m=currentHistDate.getMonth();
+  document.getElementById('hist-month-label').textContent=`${MONTHS_ES[m]} ${y}`;
+  document.getElementById('hist-day-heads').innerHTML=['L','M','X','J','V','S','D'].map(d=>`<div class="hist-day-head">${d}</div>`).join('');
+  const firstDay=new Date(y,m,1), startPad=(firstDay.getDay()+6)%7, daysInMonth=new Date(y,m+1,0).getDate(), today=todayKey();
+  let html='';
+  for(let i=0;i<startPad;i++) html+='<div class="hist-day empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const dk=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayData=attendance[dk]||{};
+    const entries=Object.values(dayData);
+    const hasData=entries.length>0;
+    const isToday=dk===today;
+    const isSelected=histSelectedDay===dk;
+    let cls='no-class';
+    if(hasData){
+      const ok=entries.filter(e=>e.s==='ok').length;
+      const no=entries.filter(e=>e.s==='no').length;
+      const late=entries.filter(e=>e.s==='late').length;
+      if(no>ok) cls='att-no';
+      else if(late>ok&&late>no) cls='att-late';
+      else if(ok>0&&no>0) cls='att-mix';
+      else if(ok>0) cls='att-ok';
+      else cls='att-late';
+    }
+    html+=`<div class="hist-day ${hasData?cls:'no-class'} ${isSelected?'selected':''} ${isToday?'today':''}" onclick="selectHistDay('${dk}')">${d}</div>`;
+  }
+  document.getElementById('hist-cal').innerHTML=html;
+  if(histSelectedDay) renderHistDayDetail(histSelectedDay);
+  else document.getElementById('hist-day-detail').innerHTML='';
+}
+function selectHistDay(dk){histSelectedDay=dk;renderAttendanceHist();renderHistDayDetail(dk);}
+function renderHistDayDetail(dk){
+  const dayAtt=attendance[dk]||{};
+  const d=new Date(dk+'T12:00:00'), dayName=DAYS_FULL[(d.getDay()+6)%7];
+  const dayStudents=students.filter(s=>s.active!==false && getStudentSlots(s).some(sl=>sl.day===dayName));
+  if(!dayStudents.length){
+    document.getElementById('hist-day-detail').innerHTML=`<div class="section-card" style="margin-top:10px"><div style="padding:14px;font-size:12px;color:var(--text3)">No hay clases programadas para ${dayName}.</div></div>`;
+    return;
+  }
+  const rows=dayStudents.map(s=>{
+    const att=dayAtt[s.id];
+    const labels={ok:'✓ Asistió',no:'✗ Faltó',late:'⏱ Retardo',jus:'📋 Justif.'};
+    const status=att?(labels[att.s]||att.s):'— Sin registro';
+    const color=!att?'var(--text3)':att.s==='ok'?'#1a5e28':att.s==='no'?'var(--danger)':att.s==='late'?'var(--warning)':'#1a3a80';
+    return `<div class="stat-row"><span class="stat-label">${s.name} <span style="color:var(--text3);font-size:10px">${s.inst}</span></span><span style="font-weight:600;color:${color};font-size:12px">${status}</span></div>`;
+  }).join('');
+  document.getElementById('hist-day-detail').innerHTML=`
+    <div class="section-card" style="margin-top:10px">
+      <div class="section-card-header">${d.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'})}</div>
+      <div style="padding:0 14px">${rows}</div>
+    </div>`;
+}
+
+// Estadísticas de asistencia con indicadores de riesgo
+function renderAttendanceStats(){
+  const now=new Date(), y=now.getFullYear(), m=now.getMonth(), daysInMonth=new Date(y,m+1,0).getDate();
+  const attCounts={};
+  const activeS=students.filter(s=>s.active!==false);
+  activeS.forEach(s=>attCounts[s.id]={ok:0,no:0,late:0,jus:0,total:0});
+
+  for(let d=1;d<=daysInMonth;d++){
+    const dk=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayDate=new Date(y,m,d);
+    const dayName=DAYS_FULL[(dayDate.getDay()+6)%7];
+    Object.entries(attendance[dk]||{}).forEach(([id,v])=>{
+      const sid=parseInt(id);
+      if(attCounts[sid]){
+        attCounts[sid][v.s]=(attCounts[sid][v.s]||0)+1;
+        attCounts[sid].total++;
+      }
+    });
+  }
+
+  // KPIs asistencia
+  const totalRecords=Object.values(attCounts).reduce((a,c)=>a+c.total,0);
+  const totalOk=Object.values(attCounts).reduce((a,c)=>a+c.ok,0);
+  const avgRate=totalRecords?Math.round(totalOk/totalRecords*100):0;
+  const atRisk=activeS.filter(s=>{const c=attCounts[s.id];return c&&c.total>0&&c.ok/c.total<0.5;}).length;
+  document.getElementById('att-kpi-grid').innerHTML=`
+    <div class="kpi-card accent"><div class="kpi-label">Asistencia promedio</div><div class="kpi-value">${avgRate}%</div><div class="kpi-sub">Mes actual</div></div>
+    <div class="kpi-card"><div class="kpi-label">En riesgo</div><div class="kpi-value" style="color:var(--danger)">${atRisk}</div><div class="kpi-sub">&lt;50% asistencia</div></div>`;
+
+  // Gráfica por alumno
+  const maxAtt=Math.max(1,...activeS.map(s=>attCounts[s.id]?.ok||0));
+  document.getElementById('att-chart-students').innerHTML=activeS.length
+    ?activeS.sort((a,b)=>(attCounts[b.id]?.ok||0)-(attCounts[a.id]?.ok||0)).slice(0,10)
+      .map((s,i)=>{const v=attCounts[s.id]?.ok||0;const cls=['bf-navy','bf-navy','bf-gold','bf-gold','bf-green','bf-green','bf-coral','bf-coral','bf-blue','bf-blue'][i];
+        return `<div class="bar-row"><span class="bar-lbl">${s.name.split(' ')[0]}</span><div class="bar-track"><div class="bar-fill ${cls}" style="width:${Math.round(v/maxAtt*100)}%">${v}</div></div></div>`;}).join('')
+    :'<div class="empty"><i class="ti ti-user-off"></i>Sin datos</div>';
+
+  // Ranking
+  document.getElementById('att-ranking').innerHTML=activeS
+    .map(s=>({s,c:attCounts[s.id]||{ok:0,no:0}})).sort((a,b)=>b.c.ok-a.c.ok)
+    .map(({s,c},i)=>`<div class="rank-item">
+      <span class="rank-n ${i<3?'top':''}">${i+1}</span>
+      <div style="flex:1"><div style="font-size:13px;font-weight:500">${s.name}</div><div style="font-size:10px;color:var(--text3)">${s.inst}</div></div>
+      <span class="badge badge-green">${c.ok} ✓</span>
+      <span class="badge badge-red" style="margin-left:4px">${c.no} ✗</span>
+    </div>`).join('')||'<div class="empty"><i class="ti ti-user-off"></i>Sin datos</div>';
+
+  // Alumnos en riesgo
+  const riskStudents=activeS.filter(s=>{const c=attCounts[s.id];return c&&c.total>0&&c.ok/c.total<0.5;});
+  document.getElementById('att-risk-list').innerHTML=riskStudents.length
+    ?riskStudents.map(s=>{
+        const c=attCounts[s.id];
+        const pct=c.total?Math.round(c.ok/c.total*100):0;
+        const riskCls=pct<25?'risk-high':pct<40?'risk-medium':'risk-low';
+        return `<div class="rank-item">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:500">${s.name}</div>
+            <div class="risk-bar"><div class="risk-fill ${riskCls}" style="width:${pct}%"></div></div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px">${pct}% asistencia · ${c.total} registros</div>
+          </div>
+          <span class="badge badge-red">${pct}%</span>
+        </div>`;
+      }).join('')
+    :'<div class="empty" style="padding:14px"><i class="ti ti-shield-check"></i>Sin alumnos en riesgo</div>';
+}
+
+// ═══ PAGOS ═══
+let currentPayTab='estado';
+function switchPayTab(tab,btn){
+  currentPayTab=tab;
+  document.querySelectorAll('#sec-pagos .tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#sec-pagos .tab-pane').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pay-tab-'+tab).classList.add('active');
+  if(tab==='estado')    renderPayEstado();
+  if(tab==='historial') renderPayHistorial();
+  if(tab==='reporte')   renderPayReporte();
+}
+function renderPayments(){renderPayEstado();}
+function renderPayEstado(){
+  const activeS=students.filter(s=>s.active!==false);
+  const now=new Date();
+  document.getElementById('pay-month-header').textContent=
+    now.toLocaleDateString('es-MX',{month:'long',year:'numeric'}).replace(/^\w/,c=>c.toUpperCase());
+  const overdue=activeS.filter(s=>!s.paid), soon7=activeS.filter(s=>s.paid&&daysUntilPayday(s)<=7);
+  const al=document.getElementById('pay-alerts');
+  al.innerHTML='';
+  if(overdue.length) al.innerHTML+=`<div class="alert danger"><i class="ti ti-alert-circle"></i><div><strong>Vencidos (${overdue.length}):</strong> ${overdue.map(s=>s.name+' · $'+netFee(s)).join(', ')}</div></div>`;
+  if(soon7.length)   al.innerHTML+=`<div class="alert warning"><i class="ti ti-clock"></i><div><strong>Próximos 7 días:</strong> ${soon7.map(s=>s.name+' ('+nextPayDate(s)+')').join(', ')}</div></div>`;
+  document.getElementById('pay-list').innerHTML=activeS
+    .sort((a,b)=>a.paid-b.paid||(daysUntilPayday(a)-daysUntilPayday(b)))
+    .map(s=>{
+      const nf=netFee(s), badge=s.paid?'<span class="badge badge-green">Pagado</span>':'<span class="badge badge-red">Vencido</span>';
+      const days=daysUntilPayday(s);
+      const daysLabel=s.paid?`<span class="venc-badge ${days<=3?'urgent':days<=7?'soon':''}">vence ${nextPayDate(s)}</span>`:'';
+      return `<div class="pay-row">
+        <div><div class="pay-name">${s.name}</div><div class="pay-detail">${s.inst}${s.discountType&&s.discountType!=='none'?' · beca':''}</div></div>
+        <div class="pay-actions">
+          ${daysLabel}<span class="pay-amount" style="color:${s.paid?'var(--success)':'var(--danger)'}">$${nf}</span>${badge}
+          <button class="pay-btn pay-btn-ok"   onclick="togglePaid(${s.id});event.stopPropagation()" title="${s.paid?'Marcar pendiente':'Marcar pagado'}">${s.paid?'↩':'✓'}</button>
+          <button class="pay-btn pay-btn-add"  onclick="openPayModal(${s.id});event.stopPropagation()" title="Registrar pago"><i class="ti ti-coin" style="font-size:12px"></i></button>
+          <button class="pay-btn pay-btn-hist" onclick="openPayHistModal(${s.id});event.stopPropagation()" title="Ver historial"><i class="ti ti-history" style="font-size:12px"></i></button>
+        </div>
+      </div>`;
+    }).join('');
+  const income=activeS.filter(s=>s.paid).reduce((a,s)=>a+netFee(s),0);
+  const pending=activeS.filter(s=>!s.paid).reduce((a,s)=>a+netFee(s),0);
+  const expected=income+pending, pct=expected>0?Math.round(income/expected*100):0;
+  document.getElementById('pay-summary').innerHTML=`
+    <div class="pay-sum-row"><span>Total cobrado</span><span style="color:#7dd898">$${income.toLocaleString()}</span></div>
+    <div class="pay-sum-row"><span>Pendiente</span><span style="color:#f08080">$${pending.toLocaleString()}</span></div>
+    <div class="pay-sum-row"><span>Proyectado</span><span>$${expected.toLocaleString()}</span></div>
+    <div class="pay-sum-row"><span>% Cobranza</span><span style="color:${pct>=80?'#7dd898':pct>=50?'#f8d878':'#f08080'}">${pct}%</span></div>`;
+}
+function togglePaid(id){
+  const s=students.find(x=>x.id===id);if(!s)return;
+  s.paid=!s.paid;saveAll();renderPayEstado();renderDashboard();
+}
+function renderPayHistorial(filter=''){
+  const list=filter?students.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())):students;
+  const entries=[];
+  list.forEach(s=>(s.payHistory||[]).forEach((p,idx)=>entries.push({s,p,idx})));
+  entries.sort((a,b)=>b.p.date.localeCompare(a.p.date));
+  document.getElementById('pay-hist-list').innerHTML=entries.length
+    ?`<div class="section-card">${entries.map(({s,p,idx})=>`
+        <div class="pay-hist-entry">
+          <div style="flex:1">
+            <div style="font-weight:600">${s.name}</div>
+            <div style="font-size:10px;color:var(--text3)">${p.date} · ${p.method||'Efectivo'}${p.notes?' · '+p.notes:''}</div>
+          </div>
+          <span class="pay-amount" style="color:var(--success);margin-right:8px">$${p.amount}</span>
+          <button class="pay-hist-edit-btn" onclick="openEditPayModal(${s.id},${idx})"><i class="ti ti-pencil" style="font-size:11px"></i></button>
+          <button class="pay-hist-del-btn" onclick="deletePayRecord(${s.id},${idx})"><i class="ti ti-trash" style="font-size:11px"></i></button>
+        </div>`).join('')}</div>`
+    :'<div class="empty"><i class="ti ti-receipt-off"></i>No hay registros de pago</div>';
+}
+function filterPayHist(q){renderPayHistorial(q);}
+function renderPayReporte(){
+  const activeS=students.filter(s=>s.active!==false);
+  const income=activeS.filter(s=>s.paid).reduce((a,s)=>a+netFee(s),0);
+  const pending=activeS.filter(s=>!s.paid).reduce((a,s)=>a+netFee(s),0);
+  const expected=income+pending, pct=expected>0?Math.round(income/expected*100):0;
+  const totalPaid=students.reduce((a,s)=>(s.payHistory||[]).reduce((b,p)=>b+p.amount,0)+a,0);
+  const discounted=students.filter(s=>s.discountType&&s.discountType!=='none').length;
+  document.getElementById('pay-reporte-content').innerHTML=`
+    <div class="kpi-grid" style="margin-bottom:12px">
+      <div class="kpi-card accent"><div class="kpi-label">Ingresos cobrados</div><div class="kpi-value">$${income.toLocaleString()}</div><div class="prog-wrap"><div class="prog-fill green" style="width:${pct}%"></div></div></div>
+      <div class="kpi-card"><div class="kpi-label">Por cobrar</div><div class="kpi-value" style="color:var(--danger)">$${pending.toLocaleString()}</div><div class="kpi-sub">Cobranza: ${pct}%</div></div>
+    </div>
+    <div class="section-card" style="margin-bottom:12px">
+      <div class="section-card-header">Resumen financiero</div>
+      <div style="padding:0 14px">
+        <div class="stat-row"><span class="stat-label">Proyección (todos pagan)</span><span class="stat-val">$${expected.toLocaleString()}</span></div>
+        <div class="stat-row"><span class="stat-label">Total histórico cobrado</span><span class="stat-val">$${totalPaid.toLocaleString()}</span></div>
+        <div class="stat-row"><span class="stat-label">Alumnos con beca/descuento</span><span class="stat-val">${discounted}</span></div>
+        <div class="stat-row"><span class="stat-label">Alumnos al corriente</span><span class="stat-val">${activeS.filter(s=>s.paid).length} / ${activeS.length}</span></div>
+      </div>
+    </div>`;
+}
+
+// Editar pago del historial
+function openEditPayModal(studentId, idx) {
+  const s=students.find(x=>x.id===studentId);if(!s)return;
+  const p=s.payHistory[idx];if(!p)return;
+  document.getElementById('pay-modal-title').textContent=`Editar pago — ${s.name}`;
+  document.getElementById('pm-amount').value=p.amount;
+  document.getElementById('pm-date').value=p.date;
+  document.getElementById('pm-method').value=p.method||'Efectivo';
+  document.getElementById('pm-notes').value=p.notes||'';
+  document.getElementById('pm-student-id').value=studentId;
+  document.getElementById('pm-edit-idx').value=idx;
+  document.getElementById('modal-pay').classList.add('open');
+}
+function deletePayRecord(studentId, idx) {
+  const s=students.find(x=>x.id===studentId);if(!s)return;
+  showConfirm('Eliminar pago', `¿Eliminar el registro de pago de ${s.name} del ${s.payHistory[idx]?.date}?`, ()=>{
+    s.payHistory.splice(idx,1);
+    saveAll();
+    renderPayHistorial(document.getElementById('pay-hist-search')?.value||'');
+    renderPayEstado();
+  });
+}
+
+// ═══ MODAL NUEVO/EDITAR ALUMNO ═══
+
+// Genera HTML de un slot de horario
+function scheduleSlotHTML(day='', time='') {
+  const dayOpts = ['','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'].map(d =>
+    `<option value="${d}" ${day===d?'selected':''}>${d||'— Día —'}</option>`).join('');
+  const hourOpts = ['','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'].map(h=>
+    `<option value="${h}" ${time===h?'selected':''}>${h||'— Hora —'}</option>`).join('');
+  return `<div class="schedule-slot-row">
+    <select onchange="refreshScheduleText()">${dayOpts}</select>
+    <select onchange="refreshScheduleText()">${hourOpts}</select>
+    <button class="del-slot-btn" onclick="removeScheduleSlot(this)" title="Quitar">×</button>
+  </div>`;
+}
+
+function addScheduleSlot(day='', time='') {
+  document.getElementById('schedule-builder').insertAdjacentHTML('beforeend', scheduleSlotHTML(day, time));
+}
+
+function removeScheduleSlot(btn) {
+  btn.closest('.schedule-slot-row').remove();
+}
+
+function refreshScheduleText() {
+  // Auto-actualiza el campo de nota de horario con los slots seleccionados
+  const rows = document.querySelectorAll('#schedule-builder .schedule-slot-row');
+  const parts = [];
+  rows.forEach(row => {
+    const selects = row.querySelectorAll('select');
+    const d = selects[0].value, t = selects[1].value;
+    if (d && t) parts.push(`${d} ${t}`);
+  });
+  // No sobreescribir si el usuario ya escribió algo custom
+}
+
+function getScheduleSlotsFromForm() {
+  const rows = document.querySelectorAll('#schedule-builder .schedule-slot-row');
+  const slots = [];
+  rows.forEach(row => {
+    const selects = row.querySelectorAll('select');
+    const d = selects[0].value, t = selects[1].value;
+    if (d && t) slots.push({day: d, time: t});
+  });
+  return slots;
+}
+
+function openNewModal(){
+  document.getElementById('modal-new-title').textContent='Nuevo alumno';
+  ['f-name','f-phone','f-schedule','f-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-inst').value='Piano';
+  document.getElementById('f-level').value='Principiante';
+  document.getElementById('f-fee').value=config.defaultFee||300;
+  document.getElementById('f-discount').value='0';
+  document.getElementById('f-discount-type').value='none';
+  document.getElementById('f-enrolled').value='';
+  document.getElementById('f-active').checked=true;
+  document.getElementById('f-edit-id').value='';
+  // Limpiar schedule builder y agregar 1 slot vacío
+  document.getElementById('schedule-builder').innerHTML='';
+  addScheduleSlot();
+  document.getElementById('modal-new').classList.add('open');
+}
+function openNewWithSlot(day, time){
+  openNewModal();
+  // Llenar el slot vacío
+  const rows = document.querySelectorAll('#schedule-builder .schedule-slot-row');
+  if (rows.length) {
+    const selects = rows[0].querySelectorAll('select');
+    if (day)  selects[0].value = day;
+    if (time) selects[1].value = time;
+  }
+}
+function openNewFromSlot(){closeModal('modal-slot');openNewWithSlot(currentSlotDay,currentSlotTime);}
+function saveStudent(){
+  const editId=parseInt(document.getElementById('f-edit-id').value)||0;
+  const name=document.getElementById('f-name').value.trim();
+  if(!name){alert('Escribe el nombre del alumno.');return;}
+  const schedules = getScheduleSlotsFromForm();
+  const obj={
+    name, phone:document.getElementById('f-phone').value.trim(),
+    inst:document.getElementById('f-inst').value, level:document.getElementById('f-level').value,
+    schedules,
+    schedule:document.getElementById('f-schedule').value.trim() || schedules.map(s=>s.day+' '+s.time).join(' · '),
+    // Compatibilidad v2: primer slot
+    day: schedules[0]?.day || '',
+    time: schedules[0]?.time || '',
+    fee:parseInt(document.getElementById('f-fee').value)||config.defaultFee||300,
+    discount:parseInt(document.getElementById('f-discount').value)||0,
+    discountType:document.getElementById('f-discount-type').value,
+    enrolled:document.getElementById('f-enrolled').value,
+    notes:document.getElementById('f-notes').value.trim(),
+    active:document.getElementById('f-active').checked
+  };
+  if(editId){const idx=students.findIndex(s=>s.id===editId);if(idx>=0) Object.assign(students[idx],obj);}
+  else students.push({id:nextId++,...obj,paid:false,payHistory:[]});
+  saveAll();closeModal('modal-new');
+  renderStudents(filteredStudents());renderCalendar();renderDashboard();
+}
+
+// ═══ MODAL DETALLE ALUMNO ═══
+function openDetail(id){
+  const s=students.find(x=>x.id===id);if(!s)return;
+  currentDetailId=id;
+  document.getElementById('detail-name').textContent=s.name;
+  const nf=netFee(s);
+  const discLabel=s.discountType&&s.discountType!=='none'?(s.discountType==='pct'?` <span class="badge badge-amber">${s.discount}% beca</span>`:` <span class="badge badge-amber">-$${s.discount} beca</span>`):'';
+  const payBadge=s.paid?'<span class="badge badge-green">Al corriente</span>':'<span class="badge badge-red">Vencido</span>';
+  const activeBadge=s.active===false?'<span class="badge badge-gray">Inactivo</span>':'<span class="badge badge-blue">Activo</span>';
+  const lastPay=(s.payHistory||[]).length?`<div class="detail-field"><span class="detail-lbl">Último pago</span><span class="detail-val">${s.payHistory[s.payHistory.length-1].date}</span></div>`:'';
+  const slots=getStudentSlots(s);
+  const schedDisplay=slots.length?slots.map(sl=>`${sl.day} ${sl.time}`).join(' · '):(s.schedule||'—');
+  document.getElementById('detail-body').innerHTML=`
+    <div class="detail-field"><span class="detail-lbl">Estado</span><span class="detail-val">${activeBadge}</span></div>
+    <div class="detail-field"><span class="detail-lbl">Instrumento</span><span class="detail-val">${s.inst}</span></div>
+    <div class="detail-field"><span class="detail-lbl">Nivel</span><span class="detail-val">${s.level}</span></div>
+    <div class="detail-field"><span class="detail-lbl">Horario</span><span class="detail-val" style="font-size:11px">${schedDisplay}</span></div>
+    <div class="detail-field"><span class="detail-lbl">Teléfono</span><span class="detail-val">${s.phone||'—'}</span></div>
+    <div class="detail-field"><span class="detail-lbl">Mensualidad</span><span class="detail-val">$${nf}/mes${discLabel}</span></div>
+    <div class="detail-field"><span class="detail-lbl">Estado pago</span><span class="detail-val">${payBadge}</span></div>
+    <div class="detail-field"><span class="detail-lbl">Próximo vence</span><span class="detail-val">${nextPayDate(s)} · ${daysUntilPayday(s)}d</span></div>
+    <div class="detail-field"><span class="detail-lbl">Inscrito</span><span class="detail-val">${s.enrolled||'—'}</span></div>
+    ${s.notes?`<div class="detail-field"><span class="detail-lbl">Notas</span><span class="detail-val">${s.notes}</span></div>`:''}
+    ${lastPay}`;
+  document.getElementById('modal-detail').classList.add('open');
+}
+function editFromDetail(){
+  const s=students.find(x=>x.id===currentDetailId);if(!s)return;
+  closeModal('modal-detail');
+  document.getElementById('modal-new-title').textContent='Editar alumno';
+  document.getElementById('f-name').value=s.name;
+  document.getElementById('f-phone').value=s.phone||'';
+  document.getElementById('f-inst').value=s.inst;
+  document.getElementById('f-level').value=s.level;
+  document.getElementById('f-schedule').value=s.schedule||'';
+  document.getElementById('f-fee').value=s.fee;
+  document.getElementById('f-discount').value=s.discount||0;
+  document.getElementById('f-discount-type').value=s.discountType||'none';
+  document.getElementById('f-enrolled').value=s.enrolled||'';
+  document.getElementById('f-notes').value=s.notes||'';
+  document.getElementById('f-active').checked=s.active!==false;
+  document.getElementById('f-edit-id').value=s.id;
+  // Reconstruir schedule builder
+  const builder = document.getElementById('schedule-builder');
+  builder.innerHTML='';
+  const slots = getStudentSlots(s);
+  if (slots.length) slots.forEach(sl => addScheduleSlot(sl.day, sl.time));
+  else addScheduleSlot();
+  document.getElementById('modal-new').classList.add('open');
+}
+function confirmDelete(){
+  const s=students.find(x=>x.id===currentDetailId);if(!s)return;
+  showConfirm('Eliminar alumno', `¿Eliminar a ${s.name}? Esta acción no se puede deshacer.`, ()=>{
+    students=students.filter(x=>x.id!==currentDetailId);
+    saveAll();closeModal('modal-detail');
+    renderStudents(filteredStudents());renderCalendar();renderDashboard();
+  });
+}
+
+// ═══ MODAL PAGO ═══
+function openPayModal(id){
+  const s=students.find(x=>x.id===id);if(!s)return;
+  document.getElementById('pay-modal-title').textContent=`Pago — ${s.name}`;
+  document.getElementById('pm-amount').value=netFee(s);
+  document.getElementById('pm-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('pm-method').value='Efectivo';
+  document.getElementById('pm-notes').value='';
+  document.getElementById('pm-student-id').value=id;
+  document.getElementById('pm-edit-idx').value='';
+  closeModal('modal-detail');
+  document.getElementById('modal-pay').classList.add('open');
+}
+function savePayment(){
+  const id=parseInt(document.getElementById('pm-student-id').value);
+  const amount=parseInt(document.getElementById('pm-amount').value)||0;
+  const date=document.getElementById('pm-date').value;
+  const method=document.getElementById('pm-method').value;
+  const notes=document.getElementById('pm-notes').value.trim();
+  const editIdxRaw=document.getElementById('pm-edit-idx').value;
+  const s=students.find(x=>x.id===id);
+  if(!s||!date||!amount){alert('Completa monto y fecha.');return;}
+  if(!s.payHistory)s.payHistory=[];
+  if(editIdxRaw!==''){
+    // Editar existente
+    const idx=parseInt(editIdxRaw);
+    s.payHistory[idx]={amount,date,method,notes};
+  } else {
+    // Nuevo pago
+    s.payHistory.push({amount,date,method,notes});
+    s.paid=true;
+  }
+  saveAll();closeModal('modal-pay');
+  renderPayHistorial(document.getElementById('pay-hist-search')?.value||'');
+  renderPayEstado();
+  renderDashboard();
+}
+function openPayHistModal(id){
+  const s=students.find(x=>x.id===id);if(!s)return;
+  document.getElementById('pay-hist-title').textContent=`Historial — ${s.name}`;
+  const hist=s.payHistory||[];
+  document.getElementById('pay-hist-body').innerHTML=hist.length
+    ?hist.slice().reverse().map((p,revIdx)=>{
+      const realIdx=hist.length-1-revIdx;
+      return `<div class="pay-hist-entry">
+        <div style="flex:1">
+          <div style="font-weight:500">${p.date}</div>
+          <div style="font-size:10px;color:var(--text3)">${p.method||'Efectivo'}${p.notes?' · '+p.notes:''}</div>
+        </div>
+        <span style="font-weight:600;color:var(--success)">$${p.amount}</span>
+        <button class="pay-hist-edit-btn" onclick="closeModal('modal-pay-hist');openEditPayModal(${id},${realIdx})"><i class="ti ti-pencil" style="font-size:11px"></i></button>
+        <button class="pay-hist-del-btn" onclick="deletePayRecord(${id},${realIdx});closeModal('modal-pay-hist')"><i class="ti ti-trash" style="font-size:11px"></i></button>
+      </div>`;
+    }).join('')
+    :'<div class="empty"><i class="ti ti-receipt-off"></i>Sin historial de pagos</div>';
+  document.getElementById('modal-pay-hist').classList.add('open');
+}
+
+// ═══ CONFIGURACIÓN ═══
+function saveConfig(){
+  config.name=document.getElementById('cfg-name').value.trim()||'River Music';
+  config.defaultFee=parseInt(document.getElementById('cfg-fee').value)||300;
+  saveAll();alert('Configuración guardada.');
+}
+function exportJSON(){
+  const data={students,attendance,nextId,config,exportedAt:new Date().toISOString(),version:3};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`RiverMusic_backup_v3_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+function importJSON(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.students){alert('Archivo inválido: no contiene datos de alumnos.');return;}
+      // Validación básica
+      if(!Array.isArray(data.students)){alert('Formato incorrecto.');return;}
+      showConfirm('Importar datos',
+        `Importar ${data.students.length} alumnos desde ${data.exportedAt?new Date(data.exportedAt).toLocaleDateString('es-MX'):'fecha desconocida'}? Se reemplazarán los datos actuales.`,
+        ()=>{
+          students=migrateStudents(data.students);
+          attendance=data.attendance||{};
+          nextId=data.nextId||(Math.max(0,...data.students.map(s=>s.id))+1);
+          config=data.config||config;
+          saveAll();renderDashboard();
+          alert(`${students.length} alumnos importados correctamente.`);
+        }, false);
+    }catch{alert('Error al leer el archivo. Verifica que sea un respaldo válido de River Music.');}
+  };
+  reader.readAsText(file);input.value='';
+}
+function confirmClearAll(){
+  showConfirm('Eliminar todos los datos', '¿Eliminar TODOS los alumnos, asistencia e historial de pagos? Esta acción no tiene vuelta atrás.', ()=>{
+    showConfirm('Confirmar eliminación', 'Esta es la confirmación final. ¿Seguro?', ()=>{
+      students=[];attendance={};nextId=1;saveAll();renderDashboard();
+      alert('Todos los datos han sido eliminados.');
+    });
+  });
+}
+
+// ═══ EXPORTAR A EXCEL ═══
+function exportExcel(type) {
+  if (typeof XLSX === 'undefined') { alert('La librería de Excel no está disponible. Verifica tu conexión.'); return; }
+  let wb, ws, data, filename;
+  if (type === 'alumnos') {
+    data = [
+      ['ID','Nombre','Teléfono','Instrumento','Nivel','Horario','Mensualidad','Descuento','Tipo descuento','Inscripción','Estado','Pago','Notas']
+    ];
+    students.forEach(s => {
+      data.push([
+        s.id, s.name, s.phone||'',
+        s.inst, s.level,
+        getStudentSlots(s).map(sl=>sl.day+' '+sl.time).join(' | ') || s.schedule || '',
+        s.fee, s.discount||0, s.discountType||'none',
+        s.enrolled||'', s.active===false?'Inactivo':'Activo',
+        s.paid?'Al corriente':'Vencido', s.notes||''
+      ]);
+    });
+    filename = `RiverMusic_Alumnos_${new Date().toISOString().slice(0,10)}.xlsx`;
+  } else if (type === 'pagos') {
+    data = [['Alumno','Instrumento','Fecha','Monto','Método','Observaciones']];
+    students.forEach(s => {
+      (s.payHistory||[]).forEach(p => {
+        data.push([s.name, s.inst, p.date, p.amount, p.method||'Efectivo', p.notes||'']);
+      });
+    });
+    filename = `RiverMusic_Pagos_${new Date().toISOString().slice(0,10)}.xlsx`;
+  } else if (type === 'asistencias') {
+    data = [['Fecha','Alumno','Instrumento','Estado','Hora registro']];
+    Object.entries(attendance).sort().forEach(([dk, dayData]) => {
+      Object.entries(dayData).forEach(([id, v]) => {
+        const s = students.find(x => x.id === parseInt(id));
+        if (!s) return;
+        const labels = {ok:'Asistió', no:'Faltó', late:'Retardo', jus:'Justificado'};
+        data.push([dk, s.name, s.inst, labels[v.s]||v.s, v.ts||'']);
+      });
+    });
+    filename = `RiverMusic_Asistencias_${new Date().toISOString().slice(0,10)}.xlsx`;
+  }
+  ws = XLSX.utils.aoa_to_sheet(data);
+  wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, type.charAt(0).toUpperCase()+type.slice(1));
+  XLSX.writeFile(wb, filename);
+}
+
+// ═══ UTILS ═══
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeModalClick(e,id){if(e.target.id===id)closeModal(id);}
+function capitalizeFirst(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+// ═══ INIT ═══
+currentAttDate  = new Date();
+currentHistDate = new Date();
+renderDashboard();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js');
+  });
+}
+</script>
+
+</body>
+</html>
