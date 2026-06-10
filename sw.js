@@ -5,7 +5,7 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll([
         './',
-        './RiverMusic_v3_PWA.html',
+        './index.html',
         './manifest.json'
       ]))
   );
